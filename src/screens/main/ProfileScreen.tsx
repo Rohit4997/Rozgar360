@@ -30,7 +30,7 @@ export const ProfileScreen = () => {
   }
 
   const handleEditProfile = () => {
-    // Navigate to edit profile screen
+    navigation.navigate('EditProfile');
   };
 
   return (

@@ -264,6 +264,7 @@ export const en = {
     help: 'Help & Support',
     about: 'About',
     logout: 'Logout',
+    language: 'Language',
   },
 };
 

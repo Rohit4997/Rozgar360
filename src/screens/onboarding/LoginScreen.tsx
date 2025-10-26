@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
@@ -15,15 +16,23 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Container } from '../../components/ui/Container';
 import { useAuthStore } from '../../stores/authStore';
+import { useAppStore } from '../../stores/appStore';
 import { RootStackParamList } from '../../navigation/types';
 
 export const LoginScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const setPhoneNumber = useAuthStore((state) => state.setPhoneNumber);
+  const updateSettings = useAppStore((state) => state.updateSettings);
   const [phone, setPhone] = React.useState('');
   const [phoneError, setPhoneError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'hi' : 'en';
+    i18n.changeLanguage(newLang);
+    updateSettings({ language: newLang });
+  };
 
   const validatePhone = (phoneNumber: string) => {
     if (!phoneNumber) {
@@ -60,6 +69,17 @@ export const LoginScreen = () => {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled">
           <View style={styles.content}>
+            <View style={styles.headerContainer}>
+              <TouchableOpacity
+                style={styles.languageButton}
+                onPress={toggleLanguage}>
+                <Text style={styles.languageIcon}>🌐</Text>
+                <Text style={styles.languageText}>
+                  {i18n.language === 'en' ? 'हिंदी' : 'English'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             <View style={styles.header}>
               <Text style={styles.appName}>{t('common.appName')}</Text>
               <Text style={styles.icon}>💼</Text>
@@ -115,9 +135,29 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: theme.spacing.lg,
   },
+  headerContainer: {
+    alignItems: 'flex-end',
+    paddingTop: theme.spacing.base,
+  },
+  languageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: theme.spacing.sm,
+    borderRadius: 8,
+    backgroundColor: theme.colors.backgroundGray,
+  },
+  languageIcon: {
+    fontSize: theme.typography.fontSize.base,
+    marginRight: theme.spacing.xs,
+  },
+  languageText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.textPrimary,
+    fontWeight: theme.typography.fontWeight.medium,
+  },
   header: {
     alignItems: 'center',
-    paddingTop: theme.spacing.xxxl,
+    paddingTop: theme.spacing.xl,
     paddingBottom: theme.spacing.xl,
   },
   appName: {

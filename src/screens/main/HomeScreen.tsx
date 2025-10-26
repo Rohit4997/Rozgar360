@@ -6,6 +6,7 @@ import {
   FlatList,
   Switch,
   TouchableOpacity,
+  TextInput,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
@@ -28,7 +29,7 @@ export const HomeScreen = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { t } = useTranslation();
   const { currentUser, toggleAvailability } = useUserStore();
-  const { filteredLabours } = useLabourStore();
+  const { filteredLabours, searchQuery, setSearchQuery } = useLabourStore();
 
   const handleLabourPress = (labourId: string) => {
     navigation.navigate('LabourDetails', { labourId });
@@ -64,10 +65,25 @@ export const HomeScreen = () => {
         </View>
       </View>
 
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder={t('home.searchLabour')}
+          placeholderTextColor={theme.colors.placeholder}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+        <TouchableOpacity style={styles.searchIcon}>
+          <Text style={styles.searchIconText}>🔍</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{t('home.allLabours')}</Text>
         <TouchableOpacity onPress={handleFilterPress}>
-          <Text style={styles.filterButton}>🔍 {t('home.filters')}</Text>
+          <Text style={styles.filterButton}>⚙️ {t('home.filters')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -157,6 +173,26 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.lg,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.textPrimary,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.lg,
+    backgroundColor: theme.colors.backgroundGray,
+    borderRadius: 24,
+    paddingHorizontal: theme.spacing.base,
+  },
+  searchInput: {
+    flex: 1,
+    height: 48,
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.textPrimary,
+  },
+  searchIcon: {
+    padding: theme.spacing.sm,
+  },
+  searchIconText: {
+    fontSize: theme.typography.fontSize.lg,
   },
   sectionHeader: {
     flexDirection: 'row',

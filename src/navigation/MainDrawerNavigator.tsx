@@ -10,9 +10,10 @@ import { useUserStore } from '../stores/userStore';
 
 // Main screens
 import { HomeStackNavigator } from './HomeStackNavigator';
-import { SearchScreen } from '../screens/main/SearchScreen';
 import { ProfileScreen } from '../screens/main/ProfileScreen';
+import { EditProfileScreen } from '../screens/main/EditProfileScreen';
 import { SettingsScreen } from '../screens/main/SettingsScreen';
+import { LanguageScreen } from '../screens/main/LanguageScreen';
 import { HelpScreen } from '../screens/main/HelpScreen';
 import { AboutScreen } from '../screens/main/AboutScreen';
 
@@ -46,8 +47,8 @@ const CustomDrawerContent = (props: DrawerContentComponentProps) => {
 
   const menuItems = [
     { name: 'HomeTab', label: t('menu.home'), icon: '🏠' },
-    { name: 'Search', label: t('menu.search'), icon: '🔍' },
     { name: 'Profile', label: t('menu.profile'), icon: '👤' },
+    { name: 'Language', label: t('menu.language'), icon: '🌐' },
     { name: 'Settings', label: t('menu.settings'), icon: '⚙️' },
     { name: 'Help', label: t('menu.help'), icon: '❓' },
     { name: 'About', label: t('menu.about'), icon: 'ℹ️' },
@@ -105,8 +106,9 @@ export const MainDrawerNavigator = () => {
         },
       }}>
       <Drawer.Screen name="HomeTab" component={HomeStackNavigator} />
-      <Drawer.Screen name="Search" component={SearchScreen} />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
+      <Drawer.Screen name="EditProfile" component={EditProfileScreen} />
+      <Drawer.Screen name="Language" component={LanguageScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
       <Drawer.Screen name="Help" component={HelpScreen} />
       <Drawer.Screen name="About" component={AboutScreen} />

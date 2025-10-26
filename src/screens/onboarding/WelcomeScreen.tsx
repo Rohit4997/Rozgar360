@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Dimensions,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
@@ -40,10 +41,16 @@ const slides = [
 
 export const WelcomeScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { t } = useTranslation();
-  const setHasSeenWelcome = useAppStore((state) => state.setHasSeenWelcome);
+  const { t, i18n } = useTranslation();
+  const { setHasSeenWelcome, updateSettings } = useAppStore();
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const scrollViewRef = React.useRef<ScrollView>(null);
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'hi' : 'en';
+    i18n.changeLanguage(newLang);
+    updateSettings({ language: newLang });
+  };
 
   const handleGetStarted = () => {
     setHasSeenWelcome(true);
@@ -71,6 +78,14 @@ export const WelcomeScreen = () => {
     <Container>
       <View style={styles.container}>
         <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.languageButton}
+            onPress={toggleLanguage}>
+            <Text style={styles.languageIcon}>🌐</Text>
+            <Text style={styles.languageText}>
+              {i18n.language === 'en' ? 'हिंदी' : 'English'}
+            </Text>
+          </TouchableOpacity>
           <Text style={styles.appName}>{t('common.appName')}</Text>
           <Button
             title={t('common.skip')}
@@ -136,6 +151,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.base,
+  },
+  languageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: theme.spacing.sm,
+    borderRadius: 8,
+    backgroundColor: theme.colors.backgroundGray,
+  },
+  languageIcon: {
+    fontSize: theme.typography.fontSize.base,
+    marginRight: theme.spacing.xs,
+  },
+  languageText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.textPrimary,
+    fontWeight: theme.typography.fontWeight.medium,
   },
   appName: {
     fontSize: theme.typography.fontSize.xl,

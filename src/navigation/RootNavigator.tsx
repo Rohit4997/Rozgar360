@@ -24,15 +24,21 @@ export const RootNavigator = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hasCompletedProfile = useUserStore((state) => state.hasCompletedProfile);
   const hasSeenWelcome = useAppStore((state) => state.hasSeenWelcome);
+  const settings = useAppStore((state) => state.settings);
 
-  // Wait for stores to rehydrate
+  // Wait for stores to rehydrate and load language
   React.useEffect(() => {
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
+      // Load language from settings
+      if (settings.language) {
+        const i18n = require('../locales/i18n').default;
+        await i18n.changeLanguage(settings.language);
+      }
       setIsReady(true);
     }, 100);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [settings.language]);
 
   if (!isReady) {
     return (

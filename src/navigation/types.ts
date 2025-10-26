@@ -8,9 +8,10 @@ export type RootStackParamList = {
 
 export type MainDrawerParamList = {
   HomeTab: undefined;
-  Search: undefined;
   Profile: undefined;
+  EditProfile: undefined;
   Settings: undefined;
+  Language: undefined;
   Help: undefined;
   About: undefined;
 };
