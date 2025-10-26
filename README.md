@@ -1,97 +1,292 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Rozgar360 - Labour Marketplace Mobile App
 
-# Getting Started
+A React Native mobile application designed to connect skilled labourers with people who need their services. Built with modern technologies and best practices.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 📱 About
 
-## Step 1: Start Metro
+Rozgar360 is a platform that solves the problem of finding labour in local towns. The app allows:
+- Workers to register their profiles and advertise their availability
+- People to search for and connect with skilled workers directly
+- Both parties to communicate without middlemen
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 🎯 Features
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### Onboarding Flow
+- **Welcome Screen**: Carousel showcasing app features
+- **Login/Signup**: Phone number-based authentication
+- **OTP Verification**: Secure verification process
+- **Profile Setup**: Comprehensive profile creation with skills, experience, and availability
 
-```sh
-# Using npm
-npm start
+### Main Flow
+- **Home Screen**: Toggle availability, browse available workers
+- **Labour Details**: View detailed worker profiles with contact options
+- **Search**: Find workers by name, skills, or location
+- **Profile**: View and manage your profile
+- **Settings**: Configure app preferences and notifications
+- **Help & Support**: FAQs and issue reporting
+- **About**: App information and contact details
 
-# OR using Yarn
-yarn start
+## 🛠 Tech Stack
+
+- **React Native 0.82.1**: Cross-platform mobile framework
+- **TypeScript**: Type-safe development
+- **Zustand**: Lightweight state management
+- **React Navigation**: Navigation library with drawer and stack navigators
+- **React i18next**: Internationalization support
+- **React Native Safe Area Context**: Safe area handling
+- **React Native Gesture Handler**: Gesture management
+- **React Native Reanimated**: Smooth animations
+
+## 📁 Project Structure
+
+```
+rozgar360/
+├── src/
+│   ├── components/          # Reusable components
+│   │   ├── common/          # Common components (LabourCard, etc.)
+│   │   └── ui/              # UI components (Button, Input, Card, etc.)
+│   ├── locales/             # Internationalization files
+│   │   ├── en.ts            # English translations
+│   │   └── i18n.ts          # i18n configuration
+│   ├── navigation/          # Navigation configuration
+│   │   ├── RootNavigator.tsx
+│   │   ├── MainDrawerNavigator.tsx
+│   │   ├── HomeStackNavigator.tsx
+│   │   └── types.ts
+│   ├── screens/             # Screen components
+│   │   ├── onboarding/      # Onboarding screens
+│   │   │   ├── WelcomeScreen.tsx
+│   │   │   ├── LoginScreen.tsx
+│   │   │   ├── OTPScreen.tsx
+│   │   │   └── ProfileSetupScreen.tsx
+│   │   └── main/            # Main flow screens
+│   │       ├── HomeScreen.tsx
+│   │       ├── LabourDetailsScreen.tsx
+│   │       ├── SearchScreen.tsx
+│   │       ├── ProfileScreen.tsx
+│   │       ├── SettingsScreen.tsx
+│   │       ├── HelpScreen.tsx
+│   │       └── AboutScreen.tsx
+│   ├── stores/              # Zustand state stores
+│   │   ├── authStore.ts     # Authentication state
+│   │   ├── userStore.ts     # User profile state
+│   │   ├── labourStore.ts   # Labour data & filters
+│   │   └── appStore.ts      # App settings
+│   ├── theme/               # Theme configuration
+│   │   ├── colors.ts        # Color palette
+│   │   ├── typography.ts    # Font styles
+│   │   ├── spacing.ts       # Spacing values
+│   │   └── index.ts         # Theme exports
+│   └── types/               # TypeScript type definitions
+├── android/                 # Android native code
+├── ios/                     # iOS native code (optional)
+├── App.tsx                  # App entry point
+├── package.json
+└── tsconfig.json
+
 ```
 
-## Step 2: Build and run your app
+## 🚀 Getting Started
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### Prerequisites
 
-### Android
+- Node.js >= 20
+- npm or yarn
+- Android Studio (for Android development)
+- JDK 11 or higher
+- React Native CLI
 
-```sh
-# Using npm
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   cd rozgar360
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Install iOS dependencies (Mac only)**
+   ```bash
+   cd ios && pod install && cd ..
+   ```
+
+### Running the App
+
+#### Android
+
+```bash
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+Or start Metro bundler separately:
+```bash
+npm start
 ```
 
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
+Then in another terminal:
+```bash
+npm run android
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+#### iOS (Mac only)
 
-```sh
-# Using npm
+```bash
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## 🔐 Test Credentials
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+### Login Phone Numbers
+- 9876543210 (OTP: 1234)
+- 8765432109 (OTP: 1234)
+- 7654321098 (OTP: 1234)
 
-## Step 3: Modify your app
+## 🎨 Theming
 
-Now that you have successfully run the app, let's make changes!
+The app uses a configurable theming system located in `src/theme/`. You can easily change colors, typography, and spacing:
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### Changing Primary Color
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+Edit `src/theme/colors.ts`:
+```typescript
+export const colors = {
+  primary: '#2196F3',  // Change this to your desired color
+  // ...
+};
+```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+### Available Theme Properties
+- **Colors**: Primary, secondary, text, background, status colors
+- **Typography**: Font sizes, weights, line heights
+- **Spacing**: Consistent spacing values throughout the app
 
-## Congratulations! :tada:
+## 🌍 Internationalization
 
-You've successfully run and modified your React Native App. :partying_face:
+The app is built with i18next for multi-language support.
 
-### Now what?
+### Current Languages
+- English (en)
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+### Adding a New Language
 
-# Troubleshooting
+1. Create a new translation file in `src/locales/` (e.g., `hi.ts` for Hindi)
+2. Copy the structure from `en.ts` and translate
+3. Import and add to `i18n.ts`:
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+```typescript
+import { hi } from './hi';
 
-# Learn More
+const resources = {
+  en: { translation: en },
+  hi: { translation: hi },
+};
+```
 
-To learn more about React Native, take a look at the following resources:
+## 📊 State Management
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+The app uses **Zustand** for state management. All state logic is avoided from components using `useState`.
+
+### Stores
+
+1. **authStore**: Authentication state, login/logout
+2. **userStore**: Current user profile and data
+3. **labourStore**: Labour listings, search, and filters
+4. **appStore**: App-level settings (language, notifications)
+
+### Usage Example
+
+```typescript
+import { useUserStore } from '../stores/userStore';
+
+const MyComponent = () => {
+  const currentUser = useUserStore((state) => state.currentUser);
+  const toggleAvailability = useUserStore((state) => state.toggleAvailability);
+  
+  // Use state and actions
+};
+```
+
+## 🗺 Navigation
+
+The app uses React Navigation with the following structure:
+
+- **RootNavigator**: Main navigation container
+  - **Welcome/Login/OTP/ProfileSetup**: Onboarding stack
+  - **MainDrawerNavigator**: Main app drawer
+    - **HomeStackNavigator**: Home and labour details
+    - **Search**: Search screen
+    - **Profile**: User profile
+    - **Settings**: App settings
+    - **Help**: Help & support
+    - **About**: About the app
+
+## 🔄 Data Flow
+
+Currently, the app uses hardcoded data in Zustand stores:
+
+- **Login credentials**: `src/stores/authStore.ts`
+- **Labour listings**: `src/stores/labourStore.ts`
+
+### Backend Integration (Future)
+
+When integrating with a backend:
+1. Replace hardcoded data with API calls
+2. Add API client in `src/utils/api.ts`
+3. Update store actions to fetch from API
+4. Add loading and error states
+
+## 🐛 Troubleshooting
+
+### Metro Bundler Issues
+```bash
+npm start -- --reset-cache
+```
+
+### Android Build Issues
+```bash
+cd android && ./gradlew clean && cd ..
+npm run android
+```
+
+### TypeScript Errors
+```bash
+npm run tsc
+```
+
+## 📝 Code Style
+
+The project uses:
+- **ESLint**: Code linting
+- **Prettier**: Code formatting
+- **TypeScript**: Type checking
+
+Run linting:
+```bash
+npm run lint
+```
+
+## 🤝 Contributing
+
+When contributing:
+1. Follow the existing code structure
+2. Use Zustand for state (avoid useState)
+3. Add translation keys for all user-facing text
+4. Maintain consistent theming using theme constants
+5. Write TypeScript interfaces for all data structures
+
+## 📄 License
+
+This project is private and proprietary.
+
+## 📞 Contact
+
+For questions or support:
+- Email: support@rozgar360.com
+- Phone: +91 98765 43210
+
+---
+
+Built with ❤️ for connecting skilled workers with opportunities
