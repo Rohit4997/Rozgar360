@@ -1,10 +1,12 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { RootStackParamList } from './types';
 import { useAuthStore } from '../stores/authStore';
 import { useUserStore } from '../stores/userStore';
 import { useAppStore } from '../stores/appStore';
+import { theme } from '../theme';
 
 // Onboarding screens
 import { WelcomeScreen } from '../screens/onboarding/WelcomeScreen';
@@ -13,14 +15,32 @@ import { OTPScreen } from '../screens/onboarding/OTPScreen';
 import { ProfileSetupScreen } from '../screens/onboarding/ProfileSetupScreen';
 
 // Main navigator
-import { MainDrawerNavigator } from '../navigation/MainDrawerNavigator';
+import { MainDrawerNavigator } from './MainDrawerNavigator';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator = () => {
+  const [isReady, setIsReady] = React.useState(false);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hasCompletedProfile = useUserStore((state) => state.hasCompletedProfile);
   const hasSeenWelcome = useAppStore((state) => state.hasSeenWelcome);
+
+  // Wait for stores to rehydrate
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!isReady) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer>
@@ -42,4 +62,13 @@ export const RootNavigator = () => {
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.background,
+  },
+});
 

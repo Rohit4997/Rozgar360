@@ -30,7 +30,8 @@ Rozgar360 is a platform that solves the problem of finding labour in local towns
 
 - **React Native 0.82.1**: Cross-platform mobile framework
 - **TypeScript**: Type-safe development
-- **Zustand**: Lightweight state management
+- **Zustand**: Lightweight state management with persistence
+- **AsyncStorage**: Persistent local storage
 - **React Navigation**: Navigation library with drawer and stack navigators
 - **React i18next**: Internationalization support
 - **React Native Safe Area Context**: Safe area handling
@@ -185,16 +186,34 @@ const resources = {
 };
 ```
 
-## 📊 State Management
+## 📊 State Management & Persistence
 
-The app uses **Zustand** for state management. All state logic is avoided from components using `useState`.
+The app uses **Zustand** for state management with **AsyncStorage** for persistent storage. All state logic avoids using `useState` and persists across app restarts.
 
-### Stores
+### Stores (Persisted with AsyncStorage)
 
 1. **authStore**: Authentication state, login/logout
+   - Persists: `isAuthenticated`, `phoneNumber`, `authStatus`
+   - User stays logged in after app restart
+
 2. **userStore**: Current user profile and data
+   - Persists: `currentUser`, `hasCompletedProfile`
+   - Profile data available immediately on app launch
+
 3. **labourStore**: Labour listings, search, and filters
-4. **appStore**: App-level settings (language, notifications)
+   - Uses hardcoded data (no persistence needed)
+   - Filters and search are session-based
+
+4. **appStore**: App-level settings
+   - Persists: `hasSeenWelcome`, `settings`
+   - Welcome screen shown only once
+
+### Storage Implementation
+
+The app uses **AsyncStorage** for:
+- 💾 **Persistent**: Data survives app restarts
+- 🔄 **Zustand Integration**: Automatic state persistence
+- 🚀 **Rehydration**: State restored on app launch
 
 ### Usage Example
 
@@ -205,9 +224,27 @@ const MyComponent = () => {
   const currentUser = useUserStore((state) => state.currentUser);
   const toggleAvailability = useUserStore((state) => state.toggleAvailability);
   
-  // Use state and actions
+  // State is automatically persisted to AsyncStorage
+  // Will be available on next app launch
 };
 ```
+
+### Persistence Behavior
+
+**On First Launch:**
+1. Shows Welcome screen (carousel)
+2. User logs in → `isAuthenticated` saved to AsyncStorage
+3. User completes profile → `hasCompletedProfile` saved to AsyncStorage
+
+**On Subsequent Launches:**
+1. AsyncStorage loads persisted state (100ms)
+2. Checks `isAuthenticated` → skips login if true
+3. Checks `hasCompletedProfile` → skips profile setup if true
+4. Directly shows Home screen for returning users
+
+**On Logout:**
+- All auth and user data cleared from AsyncStorage
+- User sees login screen on next launch
 
 ## 🗺 Navigation
 
@@ -254,6 +291,33 @@ npm run android
 ### TypeScript Errors
 ```bash
 npm run tsc
+```
+
+### Clear Persisted Storage (For Testing)
+
+If you need to clear all persisted data and start fresh:
+
+**Option 1: Using Code (Temporary)**
+```typescript
+import { clearAll } from './src/utils/storage';
+
+// Add this temporarily in App.tsx
+clearAll(); // Clears all AsyncStorage
+```
+
+**Option 2: Uninstall & Reinstall App**
+```bash
+# Android
+adb uninstall com.rozgar360
+npm run android
+```
+
+**Option 3: Debug Storage Contents**
+```typescript
+import { logAllStoredData } from './src/utils/storage';
+
+// See what's stored
+logAllStoredData();
 ```
 
 ## 📝 Code Style

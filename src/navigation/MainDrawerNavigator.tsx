@@ -9,7 +9,7 @@ import { useAuthStore } from '../stores/authStore';
 import { useUserStore } from '../stores/userStore';
 
 // Main screens
-import { HomeStackNavigator } from '../navigation/HomeStackNavigator';
+import { HomeStackNavigator } from './HomeStackNavigator';
 import { SearchScreen } from '../screens/main/SearchScreen';
 import { ProfileScreen } from '../screens/main/ProfileScreen';
 import { SettingsScreen } from '../screens/main/SettingsScreen';
