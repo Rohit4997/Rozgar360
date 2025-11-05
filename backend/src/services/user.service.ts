@@ -37,11 +37,12 @@ export class UserService {
       }
 
       // Update user with profile data
+      // Note: Email can be duplicate, only phone must be unique
       await prisma.user.update({
         where: { id: userId },
         data: {
           name: profileData.name,
-          email: profileData.email,
+          email: profileData.email || null,
           address: profileData.address,
           city: profileData.city,
           state: profileData.state,
@@ -141,11 +142,12 @@ export class UserService {
       }
 
       // Update user data
+      // Note: Email can be duplicate, only phone must be unique
       await prisma.user.update({
         where: { id: userId },
         data: {
           ...(updates.name && { name: updates.name }),
-          ...(updates.email !== undefined && { email: updates.email }),
+          ...(updates.email !== undefined && { email: updates.email || null }),
           ...(updates.address && { address: updates.address }),
           ...(updates.city && { city: updates.city }),
           ...(updates.state && { state: updates.state }),
