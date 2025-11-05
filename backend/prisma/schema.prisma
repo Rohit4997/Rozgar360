@@ -1,0 +1,185 @@
+// Prisma Schema for Rozgar360
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Model
+model User {
+  id                String   @id @default(uuid())
+  phone             String   @unique
+  email             String?  @unique
+  name              String
+  passwordHash      String?
+  profilePictureUrl String?
+  bio               String?
+  address           String
+  city              String
+  state             String
+  pincode           String
+  latitude          Float?
+  longitude         Float?
+  isAvailable       Boolean  @default(false)
+  experienceYears   Int
+  labourType        String
+  rating            Float    @default(0.0)
+  totalReviews      Int      @default(0)
+  isVerified        Boolean  @default(false)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  lastLoginAt       DateTime?
+
+  // Relations
+  skills           UserSkill[]
+  reviewsGiven     Review[]          @relation("ReviewerRelation")
+  reviewsReceived  Review[]          @relation("RevieweeRelation")
+  refreshTokens    RefreshToken[]
+  contactsSent     Contact[]         @relation("ContactFromRelation")
+  contactsReceived Contact[]         @relation("ContactToRelation")
+  notifications    Notification[]
+  searchHistory    SearchHistory[]
+  reportsSubmitted Report[]          @relation("ReporterRelation")
+  reportsReceived  Report[]          @relation("ReportedUserRelation")
+
+  @@index([phone])
+  @@index([city])
+  @@index([isAvailable])
+  @@index([latitude, longitude])
+  @@map("users")
+}
+
+// User Skills
+model UserSkill {
+  id        String   @id @default(uuid())
+  userId    String
+  skill     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skill])
+  @@index([userId])
+  @@index([skill])
+  @@map("user_skills")
+}
+
+// OTP Verification
+model OtpVerification {
+  id         String   @id @default(uuid())
+  phone      String
+  otp        String
+  isVerified Boolean  @default(false)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([phone])
+  @@index([expiresAt])
+  @@map("otp_verifications")
+}
+
+// Refresh Tokens
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  token     String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// Reviews
+model Review {
+  id         String   @id @default(uuid())
+  reviewerId String
+  revieweeId String
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  reviewer User @relation("ReviewerRelation", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewee User @relation("RevieweeRelation", fields: [revieweeId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewerId, revieweeId])
+  @@index([revieweeId])
+  @@index([rating])
+  @@map("reviews")
+}
+
+// Contact Tracking
+model Contact {
+  id         String   @id @default(uuid())
+  fromUserId String
+  toUserId   String
+  type       String
+  createdAt  DateTime @default(now())
+
+  fromUser User @relation("ContactFromRelation", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User @relation("ContactToRelation", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@map("contacts")
+}
+
+// Notifications
+model Notification {
+  id            String   @id @default(uuid())
+  userId        String
+  type          String
+  title         String
+  message       String
+  isRead        Boolean  @default(false)
+  relatedUserId String?
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+// Search History
+model SearchHistory {
+  id          String   @id @default(uuid())
+  userId      String
+  searchQuery String
+  filters     Json?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("search_history")
+}
+
+// Reports
+model Report {
+  id             String    @id @default(uuid())
+  reporterId     String
+  reportedUserId String
+  reason         String
+  status         String    @default("pending")
+  resolvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  reporter     User @relation("ReporterRelation", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser User @relation("ReportedUserRelation", fields: [reportedUserId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("reports")
+}
+
