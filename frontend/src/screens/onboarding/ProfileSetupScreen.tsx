@@ -48,8 +48,9 @@ const LABOUR_TYPES = [
 export const ProfileSetupScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
-  const { setCurrentUser, setHasCompletedProfile } = useUserStore();
+  const { completeProfile } = useUserStore();
   const phoneNumber = useAuthStore((state) => state.phoneNumber);
+  const [loading, setLoading] = React.useState(false);
   
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
@@ -88,29 +89,37 @@ export const ProfileSetupScreen = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validate()) {
-      const user = {
-        id: Date.now().toString(),
-        name,
-        email,
-        phone: phoneNumber,
-        address,
-        city,
-        state,
-        pincode,
-        bio,
-        isAvailable,
-        skills: selectedSkills,
-        experience: parseInt(experience, 10),
-        labourType: selectedLabourType,
-        rating: 0,
-        totalReviews: 0,
-      };
+      setLoading(true);
+      
+      try {
+        const result = await completeProfile({
+          name,
+          email: email || undefined,
+          address,
+          city,
+          state,
+          pincode,
+          bio: bio || undefined,
+          isAvailable,
+          skills: selectedSkills,
+          experienceYears: parseInt(experience, 10),
+          labourType: selectedLabourType as any,
+        });
 
-      setCurrentUser(user);
-      setHasCompletedProfile(true);
-      navigation.replace('Main');
+        if (result.success) {
+          navigation.replace('Main');
+        } else {
+          // Show error - you can add Alert here if needed
+          console.error('Profile setup failed:', result.error);
+        }
+      } catch (error: any) {
+        console.error('Profile setup error:', error);
+        // Show error - you can add Alert here if needed
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -260,6 +269,7 @@ export const ProfileSetupScreen = () => {
             variant="primary"
             size="large"
             style={styles.submitButton}
+            loading={loading}
           />
         </View>
       </ScrollView>

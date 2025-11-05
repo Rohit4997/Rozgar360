@@ -28,8 +28,32 @@ type HomeScreenNavigationProp = CompositeNavigationProp<
 export const HomeScreen = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { t } = useTranslation();
-  const { currentUser, toggleAvailability } = useUserStore();
-  const { filteredLabours, searchQuery, setSearchQuery } = useLabourStore();
+  const { currentUser, toggleAvailability, fetchProfile } = useUserStore();
+  const { filteredLabours, searchQuery, setSearchQuery, fetchLabours, searchLabours, loading } = useLabourStore();
+
+  // Fetch profile and labours on mount
+  React.useEffect(() => {
+    fetchProfile();
+    fetchLabours({ availableOnly: true });
+  }, [fetchProfile, fetchLabours]);
+
+  // Search labours when search query changes
+  React.useEffect(() => {
+    if (searchQuery.trim()) {
+      // Debounce search
+      const timeoutId = setTimeout(() => {
+        searchLabours({});
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    } else {
+      // If search is cleared, fetch all labours
+      fetchLabours({ availableOnly: true });
+    }
+  }, [searchQuery, searchLabours, fetchLabours]);
+
+  const handleToggleAvailability = async (value: boolean) => {
+    await toggleAvailability(value);
+  };
 
   const handleLabourPress = (labourId: string) => {
     navigation.navigate('LabourDetails', { labourId });
@@ -55,7 +79,7 @@ export const HomeScreen = () => {
           </View>
           <Switch
             value={currentUser?.isAvailable || false}
-            onValueChange={toggleAvailability}
+            onValueChange={handleToggleAvailability}
             trackColor={{
               false: theme.colors.border,
               true: theme.colors.success,
@@ -91,7 +115,11 @@ export const HomeScreen = () => {
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>{t('home.noLabours')}</Text>
+      {loading ? (
+        <Text style={styles.emptyText}>Loading...</Text>
+      ) : (
+        <Text style={styles.emptyText}>{t('home.noLabours')}</Text>
+      )}
     </View>
   );
 

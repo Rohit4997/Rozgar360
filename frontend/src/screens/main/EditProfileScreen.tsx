@@ -46,7 +46,7 @@ const LABOUR_TYPES = [
 export const EditProfileScreen = () => {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
-  const { currentUser, updateUser } = useUserStore();
+  const { currentUser, updateProfile } = useUserStore();
   
   const [name, setName] = React.useState(currentUser?.name || '');
   const [email, setEmail] = React.useState(currentUser?.email || '');
@@ -85,9 +85,9 @@ export const EditProfileScreen = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (validate()) {
-      updateUser({
+      const result = await updateProfile({
         name,
         email,
         address,
@@ -101,16 +101,23 @@ export const EditProfileScreen = () => {
         labourType: selectedLabourType,
       });
 
-      Alert.alert(
-        t('common.success'),
-        t('messages.profileUpdated'),
-        [
-          {
-            text: t('common.ok'),
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
+      if (result.success) {
+        Alert.alert(
+          t('common.success'),
+          t('messages.profileUpdated'),
+          [
+            {
+              text: t('common.ok'),
+              onPress: () => navigation.goBack(),
+            },
+          ]
+        );
+      } else {
+        Alert.alert(
+          t('common.error'),
+          result.error || t('messages.profileUpdateFailed')
+        );
+      }
     }
   };
 

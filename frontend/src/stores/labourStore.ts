@@ -1,19 +1,49 @@
 import { create } from 'zustand';
 import { Labour, FilterOptions } from '../types';
+import { getLabours, getLaboursById, getLaboursNearby } from '../api';
+import { LabourResp } from '../api/types';
+
+// Helper to convert API LabourResp to app Labour type
+const mapLabourRespToLabour = (labourResp: LabourResp): Labour => ({
+  id: labourResp.id,
+  name: labourResp.name,
+  email: labourResp.email || '',
+  phone: labourResp.phone,
+  address: labourResp.address,
+  city: labourResp.city,
+  state: labourResp.state,
+  pincode: labourResp.pincode,
+  profilePicture: labourResp.profilePictureUrl || undefined,
+  bio: labourResp.bio || undefined,
+  isAvailable: labourResp.isAvailable,
+  skills: labourResp.skills,
+  experience: labourResp.experienceYears,
+  labourType: labourResp.labourType as any,
+  rating: labourResp.rating,
+  totalReviews: labourResp.totalReviews,
+  latitude: labourResp.latitude || undefined,
+  longitude: labourResp.longitude || undefined,
+  distance: labourResp.distance,
+});
 
 interface LabourState {
   labours: Labour[];
   filteredLabours: Labour[];
   filters: FilterOptions;
   searchQuery: string;
+  loading: boolean;
+  error: string | null;
   
   // Actions
   setLabours: (labours: Labour[]) => void;
+  fetchLabours: (filters?: Partial<FilterOptions>) => Promise<void>;
+  searchLabours: (filters: Partial<FilterOptions>) => Promise<void>;
+  getLabourById: (id: string) => Promise<Labour | null>;
+  getNearbyLabours: (latitude: number, longitude: number, radius?: number) => Promise<void>;
   setFilters: (filters: Partial<FilterOptions>) => void;
   setSearchQuery: (query: string) => void;
   applyFilters: () => void;
   resetFilters: () => void;
-  getLabourById: (id: string) => Labour | undefined;
 }
 
 const defaultFilters: FilterOptions = {
@@ -220,12 +250,129 @@ const HARDCODED_LABOURS: Labour[] = [
 ];
 
 export const useLabourStore = create<LabourState>((set, get) => ({
-  labours: HARDCODED_LABOURS,
-  filteredLabours: HARDCODED_LABOURS,
+  labours: [],
+  filteredLabours: [],
   filters: defaultFilters,
   searchQuery: '',
+  loading: false,
+  error: null,
 
   setLabours: (labours) => set({ labours, filteredLabours: labours }),
+  
+  fetchLabours: async (filters?: Partial<FilterOptions>) => {
+    try {
+      set({ loading: true, error: null });
+      
+      const currentFilters = { ...get().filters, ...filters };
+      const params: any = {
+        availableOnly: currentFilters.availableOnly,
+        page: 1,
+        limit: 50,
+      };
+      
+      if (currentFilters.skills.length > 0) {
+        params.skills = currentFilters.skills;
+      }
+      if (currentFilters.experienceRange.min > 0) {
+        params.minExperience = currentFilters.experienceRange.min;
+      }
+      if (currentFilters.experienceRange.max < 50) {
+        params.maxExperience = currentFilters.experienceRange.max;
+      }
+      if (currentFilters.labourTypes.length > 0) {
+        params.labourType = currentFilters.labourTypes[0]; // API expects single value
+      }
+      if (currentFilters.minRating > 0) {
+        params.minRating = currentFilters.minRating;
+      }
+      
+      const response = await getLabours(params);
+      
+      if (response.success) {
+        const labours = response.labours.map(mapLabourRespToLabour);
+        set({ labours, filteredLabours: labours, loading: false });
+      } else {
+        set({ loading: false, error: 'Failed to fetch labours' });
+      }
+    } catch (error: any) {
+      set({ loading: false, error: error.message || 'Failed to fetch labours' });
+    }
+  },
+  
+  searchLabours: async (filters: Partial<FilterOptions>) => {
+    try {
+      set({ loading: true, error: null });
+      get().setFilters(filters);
+      
+      const currentFilters = { ...get().filters, ...filters };
+      const params: any = {
+        availableOnly: currentFilters.availableOnly,
+        page: 1,
+        limit: 50,
+      };
+      
+      if (get().searchQuery) {
+        params.search = get().searchQuery;
+      }
+      if (currentFilters.skills.length > 0) {
+        params.skills = currentFilters.skills;
+      }
+      if (currentFilters.experienceRange.min > 0) {
+        params.minExperience = currentFilters.experienceRange.min;
+      }
+      if (currentFilters.experienceRange.max < 50) {
+        params.maxExperience = currentFilters.experienceRange.max;
+      }
+      if (currentFilters.labourTypes.length > 0) {
+        params.labourType = currentFilters.labourTypes[0];
+      }
+      if (currentFilters.minRating > 0) {
+        params.minRating = currentFilters.minRating;
+      }
+      
+      const response = await getLabours(params);
+      
+      if (response.success) {
+        const labours = response.labours.map(mapLabourRespToLabour);
+        set({ filteredLabours: labours, loading: false });
+      } else {
+        set({ loading: false, error: 'Failed to search labours' });
+      }
+    } catch (error: any) {
+      set({ loading: false, error: error.message || 'Failed to search labours' });
+    }
+  },
+  
+  getLabourById: async (id: string) => {
+    try {
+      const response = await getLaboursById({ id });
+      
+      if (response.success && response.labour) {
+        return mapLabourRespToLabour(response.labour);
+      }
+      
+      return null;
+    } catch (error: any) {
+      console.error('Error fetching labour:', error);
+      return null;
+    }
+  },
+  
+  getNearbyLabours: async (latitude: number, longitude: number, radius: number = 10) => {
+    try {
+      set({ loading: true, error: null });
+      const response = await getLaboursNearby({ latitude, longitude, radius, limit: 20 });
+      
+      if (response.success) {
+        const labours = response.labours.map(mapLabourRespToLabour);
+        set({ labours, filteredLabours: labours, loading: false });
+      } else {
+        set({ loading: false, error: 'Failed to fetch nearby labours' });
+      }
+    } catch (error: any) {
+      set({ loading: false, error: error.message || 'Failed to fetch nearby labours' });
+    }
+  },
   
   setFilters: (newFilters) => set((state) => ({
     filters: { ...state.filters, ...newFilters },
@@ -237,11 +384,11 @@ export const useLabourStore = create<LabourState>((set, get) => ({
   },
   
   applyFilters: () => {
-    const { labours, filters, searchQuery } = get();
+    const { filteredLabours, filters, searchQuery } = get();
     
-    let filtered = [...labours];
+    let filtered = [...filteredLabours];
     
-    // Search query filter
+    // Search query filter (client-side for already fetched data)
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -252,49 +399,12 @@ export const useLabourStore = create<LabourState>((set, get) => ({
       );
     }
     
-    // Skills filter
-    if (filters.skills.length > 0) {
-      filtered = filtered.filter((labour) =>
-        filters.skills.some((skill) => labour.skills.includes(skill))
-      );
-    }
-    
-    // Experience filter
-    filtered = filtered.filter(
-      (labour) =>
-        labour.experience >= filters.experienceRange.min &&
-        labour.experience <= filters.experienceRange.max
-    );
-    
-    // Labour type filter
-    if (filters.labourTypes.length > 0) {
-      filtered = filtered.filter((labour) =>
-        filters.labourTypes.includes(labour.labourType)
-      );
-    }
-    
-    // Available only filter
-    if (filters.availableOnly) {
-      filtered = filtered.filter((labour) => labour.isAvailable);
-    }
-    
-    // Rating filter
-    if (filters.minRating > 0) {
-      filtered = filtered.filter(
-        (labour) => (labour.rating || 0) >= filters.minRating
-      );
-    }
-    
     set({ filteredLabours: filtered });
   },
   
   resetFilters: () => {
     set({ filters: defaultFilters, searchQuery: '' });
-    get().applyFilters();
-  },
-  
-  getLabourById: (id) => {
-    return get().labours.find((labour) => labour.id === id);
+    get().fetchLabours();
   },
 }));
 
