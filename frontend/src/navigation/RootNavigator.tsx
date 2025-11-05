@@ -25,6 +25,7 @@ export const RootNavigator = () => {
   const hasCompletedProfile = useUserStore((state) => state.hasCompletedProfile);
   const hasSeenWelcome = useAppStore((state) => state.hasSeenWelcome);
   const settings = useAppStore((state) => state.settings);
+  const fetchProfile = useUserStore((state) => state.fetchProfile);
 
   // Wait for stores to rehydrate and load language
   React.useEffect(() => {
@@ -34,11 +35,17 @@ export const RootNavigator = () => {
         const i18n = require('../locales/i18n').default;
         await i18n.changeLanguage(settings.language);
       }
+      
+      // Fetch profile if authenticated and profile is completed
+      if (isAuthenticated && hasCompletedProfile) {
+        await fetchProfile();
+      }
+      
       setIsReady(true);
     }, 100);
     
     return () => clearTimeout(timer);
-  }, [settings.language]);
+  }, [settings.language, isAuthenticated, hasCompletedProfile, fetchProfile]);
 
   if (!isReady) {
     return (

@@ -21,7 +21,7 @@ import { RootStackParamList } from '../../navigation/types';
 export const OTPScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
-  const { phoneNumber, login } = useAuthStore();
+  const { phoneNumber, verifyOTP, sendOTP } = useAuthStore();
   const [otp, setOtp] = React.useState(['', '', '', '']);
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -56,23 +56,40 @@ export const OTPScreen = () => {
     }
 
     setLoading(true);
-    const success = await login(phoneNumber, otpValue);
+    const result = await verifyOTP(phoneNumber, otpValue);
     setLoading(false);
 
-    if (success) {
-      navigation.replace('ProfileSetup');
+    if (result.success) {
+      if (result.isNewUser) {
+        navigation.replace('ProfileSetup');
+      } else {
+        navigation.replace('Main');
+      }
     } else {
-      setError(t('auth.invalidOtp'));
+      setError(result.error || t('auth.invalidOtp'));
       setOtp(['', '', '', '']);
       inputRefs.current[0]?.focus();
     }
   };
 
-  const handleResendOTP = () => {
+  const handleResendOTP = async () => {
     setOtp(['', '', '', '']);
     setError('');
-    inputRefs.current[0]?.focus();
-    // Simulate resend
+    setLoading(true);
+    
+    try {
+      const result = await sendOTP(phoneNumber);
+      
+      if (result.success) {
+        inputRefs.current[0]?.focus();
+      } else {
+        setError(result.error || 'Failed to resend OTP');
+      }
+    } catch (error: any) {
+      setError(error.message || 'Failed to resend OTP');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -17,7 +17,22 @@ import { useUserStore } from '../../stores/userStore';
 export const ProfileScreen = () => {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
-  const currentUser = useUserStore((state) => state.currentUser);
+  const { currentUser, fetchProfile, loading } = useUserStore();
+
+  React.useEffect(() => {
+    // Fetch profile when screen mounts
+    fetchProfile();
+  }, [fetchProfile]);
+
+  if (loading && !currentUser) {
+    return (
+      <Container>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Loading...</Text>
+        </View>
+      </Container>
+    );
+  }
 
   if (!currentUser) {
     return (

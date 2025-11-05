@@ -22,7 +22,7 @@ import { RootStackParamList } from '../../navigation/types';
 export const LoginScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t, i18n } = useTranslation();
-  const setPhoneNumber = useAuthStore((state) => state.setPhoneNumber);
+  const sendOTP = useAuthStore((state) => state.sendOTP);
   const updateSettings = useAppStore((state) => state.updateSettings);
   const [phone, setPhone] = React.useState('');
   const [phoneError, setPhoneError] = React.useState('');
@@ -44,19 +44,26 @@ export const LoginScreen = () => {
     return '';
   };
 
-  const handleSendOTP = () => {
+  const handleSendOTP = async () => {
     const error = validatePhone(phone);
     setPhoneError(error);
 
     if (!error) {
       setLoading(true);
-      setPhoneNumber(phone);
       
-      // Simulate API call
-      setTimeout(() => {
+      try {
+        const result = await sendOTP(phone);
+        
+        if (result.success) {
+          navigation.navigate('OTP');
+        } else {
+          setPhoneError(result.error || 'Failed to send OTP');
+        }
+      } catch (error: any) {
+        setPhoneError(error.message || 'Failed to send OTP');
+      } finally {
         setLoading(false);
-        navigation.navigate('OTP');
-      }, 1000);
+      }
     }
   };
 

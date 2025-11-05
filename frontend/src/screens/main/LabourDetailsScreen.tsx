@@ -29,7 +29,33 @@ export const LabourDetailsScreen = () => {
   const { t } = useTranslation();
   const { labourId } = route.params;
   const getLabourById = useLabourStore((state) => state.getLabourById);
-  const labour = getLabourById(labourId);
+  const [labour, setLabour] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchLabour = async () => {
+      try {
+        const result = await getLabourById(labourId);
+        setLabour(result);
+      } catch (error) {
+        console.error('Error fetching labour:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLabour();
+  }, [labourId, getLabourById]);
+
+  if (loading) {
+    return (
+      <Container>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Loading...</Text>
+        </View>
+      </Container>
+    );
+  }
 
   if (!labour) {
     return (
@@ -129,7 +155,7 @@ export const LabourDetailsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('labourDetails.skills')}</Text>
           <View style={styles.skillsContainer}>
-            {labour.skills.map((skill) => (
+                {labour.skills.map((skill: string) => (
               <View key={skill} style={styles.skillBadge}>
                 <Text style={styles.skillText}>{t(`skills.${skill}`)}</Text>
               </View>
