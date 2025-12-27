@@ -12,11 +12,9 @@ import {
   RateLimitError,
   ServerError,
 } from './errors';
+import Config from 'react-native-config';
 
-// Configuration
-const API_BASE_URL = __DEV__
-  ? 'http://10.0.2.2:3000/api/v1' // Android Emulator
-  : 'https://api.rozgar360.com/api/v1'; // Production
+const API_BASE_URL = Config['API_BASE_URL'] || 'http://10.0.2.2:3000/api/v1'
 
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
 const TOKEN_KEY = 'access_token';

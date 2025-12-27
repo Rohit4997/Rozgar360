@@ -4,6 +4,7 @@ import { AuthStatus } from '../types';
 import { zustandStorage } from '../utils/storage';
 import { postAuthSendOTP, postAuthVerifyOTP, postAuthLogout } from '../api';
 import { AuthenticationError, RateLimitError, ValidationError } from '../api/errors';
+import { useUserStore } from './userStore';
 
 interface AuthState {
   authStatus: AuthStatus;
@@ -68,7 +69,10 @@ export const useAuthStore = create<AuthState>()(
               authStatus: 'authenticated',
               phoneNumber: phone 
             });
-            return { success: true, isNewUser: response.isNewUser };
+            if (response.user) {
+              useUserStore.setState({ hasCompletedProfile: true });
+            }
+            return { success: true, isNewUser: !response.user };
           }
           
           return { success: false, error: 'Failed to verify OTP' };

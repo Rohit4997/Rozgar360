@@ -24,7 +24,7 @@ export async function postAuthSendOTP(
 ): Promise<SendOTPResp> {
   try {
     return await api.post<SendOTPResp>('/auth/send-otp', data, {
-      skipAuth: true,
+      skipAuth: false,
       timeout: options?.timeout,
     });
   } catch (error) {
@@ -42,7 +42,7 @@ export async function postAuthVerifyOTP(
 ): Promise<VerifyOTPResp> {
   try {
     const response = await api.post<VerifyOTPResp>('/auth/verify-otp', data, {
-      skipAuth: true,
+      skipAuth: false,
       timeout: options?.timeout,
     });
     
@@ -67,7 +67,7 @@ export async function postAuthRefreshToken(
 ): Promise<RefreshTokenResp> {
   try {
     const response = await api.post<RefreshTokenResp>('/auth/refresh-token', data, {
-      skipAuth: true,
+      skipAuth: false,
       timeout: options?.timeout,
     });
     
