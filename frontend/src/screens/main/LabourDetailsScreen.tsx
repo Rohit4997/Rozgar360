@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   Linking,
+  Alert,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -97,6 +98,57 @@ export const LabourDetailsScreen = () => {
     Linking.openURL(`sms:${labour.phone}`);
   };
 
+  const handleNavigate = () => {
+    if (!labour.latitude || !labour.longitude) {
+      Alert.alert(
+        t('common.error') || 'Error',
+        t('labourDetails.locationNotAvailable') || 'Location not available for this labourer'
+      );
+      return;
+    }
+
+    const { latitude, longitude } = labour;
+    
+    // Try Google Maps navigation (turn-by-turn)
+    // Format: google.navigation:q=latitude,longitude
+    const googleNavUrl = `google.navigation:q=${latitude},${longitude}`;
+    
+    // Fallback to geo URI if Google Maps not available
+    const geoUrl = `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
+    
+    // Web fallback
+    const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+
+    // Try Google Maps navigation first
+    Linking.canOpenURL(googleNavUrl)
+      .then((supported) => {
+        if (supported) {
+          return Linking.openURL(googleNavUrl);
+        } else {
+          // Try geo URI
+          return Linking.canOpenURL(geoUrl).then((geoSupported) => {
+            if (geoSupported) {
+              return Linking.openURL(geoUrl);
+            } else {
+              // Fallback to web
+              return Linking.openURL(webUrl);
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('Error opening maps:', err);
+        // Fallback to web
+        Linking.openURL(webUrl).catch((webErr) => {
+          console.error('Error opening web maps:', webErr);
+          Alert.alert(
+            t('common.error') || 'Error',
+            t('labourDetails.mapOpenFailed') || 'Failed to open maps. Please try again.'
+          );
+        });
+      });
+  };
+
   return (
     <Container>
       <ScrollView style={styles.container}>
@@ -176,6 +228,15 @@ export const LabourDetailsScreen = () => {
             <Text style={styles.distanceText}>
               📍 {distance} {t('home.away') || 'away'}
             </Text>
+          )}
+          {labour.latitude && labour.longitude && (
+            <Button
+              title={t('labourDetails.navigate') || '🗺️ Navigate'}
+              onPress={handleNavigate}
+              variant="primary"
+              size="medium"
+              style={styles.navigateButton}
+            />
           )}
         </View>
 
@@ -350,6 +411,9 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontWeight: theme.typography.fontWeight.medium,
     marginTop: theme.spacing.xs,
+  },
+  navigateButton: {
+    marginTop: theme.spacing.md,
   },
   errorContainer: {
     flex: 1,
