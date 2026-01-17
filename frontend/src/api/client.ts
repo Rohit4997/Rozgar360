@@ -207,6 +207,12 @@ class ApiClient {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout || DEFAULT_TIMEOUT);
 
+    if (options.body) {
+      console.info("📤 API Request:", url, options.body);
+    } else {
+      console.info("📤 API Request:", url);
+    }
+
     try {
       const response = await fetch(url, {
         ...fetchOptions,
@@ -242,6 +248,8 @@ class ApiClient {
         this.handleError(response.status, data);
       }
 
+      console.info("✅ API Response:", url, data);
+
       return data as T;
     } catch (error: any) {
       clearTimeout(timeoutId);
@@ -253,7 +261,7 @@ class ApiClient {
       if (error instanceof ApiError || error instanceof NetworkError) {
         throw error;
       }
-
+      console.error("❌ API Error:", url, error.message || 'Network request failed');
       throw new NetworkError(error.message || 'Network request failed');
     }
   }
