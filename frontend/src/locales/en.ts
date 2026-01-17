@@ -1,7 +1,9 @@
+import { APP_NAME } from "../utils/constants";
+
 export const en = {
   // Common
   common: {
-    appName: 'Rozgar360',
+    appName: APP_NAME,
     continue: 'Continue',
     skip: 'Skip',
     next: 'Next',
@@ -18,21 +20,19 @@ export const en = {
     close: 'Close',
     search: 'Search',
     filter: 'Filter',
-    apply: 'Apply',
     reset: 'Reset',
     logout: 'Logout',
     yes: 'Yes',
     no: 'No',
     ok: 'Ok',
     loading: 'Loading...',
-    error: 'Error',
     success: 'Success',
     add: 'Add',
   },
 
   // Welcome Screen
   welcome: {
-    title: 'Welcome to Rozgar360',
+    title: `Welcome to ${APP_NAME}`,
     subtitle: 'Find skilled labour or offer your services with ease',
     slide1Title: 'Find Labour Easily',
     slide1Description: 'Search for skilled workers in your area with just a few taps',
@@ -47,7 +47,7 @@ export const en = {
   auth: {
     login: 'Login',
     signup: 'Sign Up',
-    loginTitle: 'Welcome Back!',
+    loginTitle: 'Welcome!',
     signupTitle: 'Create Account',
     phoneNumber: 'Phone Number',
     email: 'Email',
@@ -195,9 +195,9 @@ export const en = {
 
   // About
   about: {
-    title: 'About Rozgar360',
+    title: `About ${APP_NAME}`,
     version: 'Version',
-    description: 'Rozgar360 is a platform designed to connect skilled labourers with people who need their services. We believe in empowering workers and making it easier for everyone to find the help they need.',
+    description: `${APP_NAME} is a platform designed to connect skilled labourers with people who need their services. We believe in empowering workers and making it easier for everyone to find the help they need.`,
     mission: 'Our Mission',
     missionText: 'To create a transparent and accessible platform for labour services.',
     team: 'Our Team',

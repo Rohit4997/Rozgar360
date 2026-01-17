@@ -82,9 +82,24 @@ export function useUpdateCurrentLocation() {
     // Only run once per session
     if (!hasRunRef.current && isAuthenticated) {
       hasRunRef.current = true;
-      // Call without modal first (silent attempt)
-      updateLocation(false).catch(() => {
-        // Silently fail
+      // Check permission first, and request if not granted
+      checkLocationPermission().then((hasPermission) => {
+        if (!hasPermission) {
+          // Show permission modal if permission is not granted
+          updateLocation(true).catch(() => {
+            // Silently fail
+          });
+        } else {
+          // If permission is already granted, just update location silently
+          updateLocation(false).catch(() => {
+            // Silently fail
+          });
+        }
+      }).catch(() => {
+        // If check fails, try to request permission
+        updateLocation(true).catch(() => {
+          // Silently fail
+        });
       });
     }
   }, [isAuthenticated, updateLocation]);

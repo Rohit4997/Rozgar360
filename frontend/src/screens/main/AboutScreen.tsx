@@ -11,13 +11,14 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '../../theme';
 import { Container } from '../../components/ui/Container';
+import { ADDRESS, APP_NAME, APP_VERSION, INFO_EMAIL } from '../../utils/constants';
 
 export const AboutScreen = () => {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
 
   const handleContactUs = () => {
-    Linking.openURL('mailto:info@rozgar360.com');
+    Linking.openURL(`mailto:${INFO_EMAIL}`);
   };
 
   return (
@@ -36,9 +37,9 @@ export const AboutScreen = () => {
         <View style={styles.content}>
           <View style={styles.logoContainer}>
             <Text style={styles.logo}>💼</Text>
-            <Text style={styles.appName}>{t('common.appName')}</Text>
+            <Text style={styles.appName}>{APP_NAME}</Text>
             <Text style={styles.version}>
-              {t('about.version')} 1.0.0
+              {t('about.version')} {APP_VERSION}
             </Text>
           </View>
 
@@ -55,14 +56,14 @@ export const AboutScreen = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('about.contactUs')}</Text>
             <TouchableOpacity onPress={handleContactUs}>
-              <Text style={styles.link}>📧 info@rozgar360.com</Text>
+              <Text style={styles.link}>📧 {INFO_EMAIL}</Text>
             </TouchableOpacity>
-            <Text style={styles.description}>📍 Indore, Madhya Pradesh, India</Text>
+            <Text style={styles.description}>📍 {ADDRESS}</Text>
           </View>
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>
-              © 2025 Rozgar360. All rights reserved.
+              © 2026 {APP_NAME}. All rights reserved.
             </Text>
           </View>
         </View>

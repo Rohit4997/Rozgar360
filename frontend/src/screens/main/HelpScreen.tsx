@@ -13,6 +13,7 @@ import { theme } from '../../theme';
 import { Container } from '../../components/ui/Container';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { CONTACT_PHONE, INFO_EMAIL } from '../../utils/constants';
 
 export const HelpScreen = () => {
   const navigation = useNavigation<any>();
@@ -21,11 +22,11 @@ export const HelpScreen = () => {
   const [issueDescription, setIssueDescription] = React.useState('');
 
   const handleEmailUs = () => {
-    Linking.openURL('mailto:support@rozgar360.com');
+    Linking.openURL(`mailto:${INFO_EMAIL}`);
   };
 
   const handleCallUs = () => {
-    Linking.openURL('tel:+919876543210');
+    Linking.openURL(`tel:${CONTACT_PHONE}`);
   };
 
   const handleSubmit = () => {
@@ -36,7 +37,7 @@ export const HelpScreen = () => {
 
   const faqs = [
     {
-      question: 'How do I register on Rozgar360?',
+      question: 'How do I register on Rozgar Setu?',
       answer: 'You can register using your phone number. We\'ll send you an OTP to verify.',
     },
     {
@@ -80,11 +81,11 @@ export const HelpScreen = () => {
               style={styles.contactButton}
             />
           </View>
-          <Text style={styles.contactInfo}>📧 support@rozgar360.com</Text>
-          <Text style={styles.contactInfo}>📞 +91 98765 43210</Text>
+          <Text style={styles.contactInfo}>📧 {INFO_EMAIL}</Text>
+          <Text style={styles.contactInfo}>📞 {CONTACT_PHONE}</Text>
         </View>
 
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('help.reportIssue')}</Text>
           <Input
             label={t('help.issueTitle')}
@@ -106,7 +107,7 @@ export const HelpScreen = () => {
             variant="primary"
             size="large"
           />
-        </View>
+        </View> */}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('help.faqTitle')}</Text>

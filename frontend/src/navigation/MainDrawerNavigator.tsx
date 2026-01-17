@@ -49,7 +49,7 @@ const CustomDrawerContent = (props: DrawerContentComponentProps) => {
     { name: 'HomeTab', label: t('menu.home'), icon: '🏠' },
     { name: 'Profile', label: t('menu.profile'), icon: '👤' },
     { name: 'Language', label: t('menu.language'), icon: '🌐' },
-    { name: 'Settings', label: t('menu.settings'), icon: '⚙️' },
+    // { name: 'Settings', label: t('menu.settings'), icon: '⚙️' },
     { name: 'Help', label: t('menu.help'), icon: '❓' },
     { name: 'About', label: t('menu.about'), icon: 'ℹ️' },
   ];

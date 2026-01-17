@@ -94,13 +94,13 @@ export const LoginScreen = () => {
 
             <View style={styles.form}>
               <Text style={styles.title}>{t('auth.loginTitle')}</Text>
-              <Text style={styles.subtitle}>
+              {/* <Text style={styles.subtitle}>
                 {t('auth.enterPhoneNumber')}
-              </Text>
+              </Text> */}
 
               <Input
                 label={t('auth.phoneNumber')}
-                placeholder="9876543210"
+                placeholder={t('auth.enterPhoneNumber')}
                 keyboardType="phone-pad"
                 maxLength={10}
                 value={phone}
@@ -111,9 +111,9 @@ export const LoginScreen = () => {
                 error={phoneError}
               />
 
-              <Text style={styles.hint}>
-                💡 Use: 9876543210, 8765432109, or 7654321098
-              </Text>
+              {/* <Text style={styles.hint}>
+                💡 Use: {t('auth.enterPhoneNumber')}
+              </Text> */}
 
               <Button
                 title={t('auth.sendOtp')}

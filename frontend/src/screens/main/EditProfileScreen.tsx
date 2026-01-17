@@ -17,7 +17,8 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Container } from '../../components/ui/Container';
 import { useUserStore } from '../../stores/userStore';
-import { fetchCurrentLocation } from '../../utils/location';
+import { fetchCurrentLocation, checkLocationPermission, requestLocationPermission } from '../../utils/location';
+import { APP_NAME } from '../../utils/constants';
 
 const DEFAULT_SKILLS = [
   'farming',
@@ -110,6 +111,45 @@ export const EditProfileScreen = () => {
   };
 
   const handleFetchLocation = async () => {
+    // Check permission first
+    const hasPermission = await checkLocationPermission();
+    
+    if (!hasPermission) {
+      // Show permission modal before requesting
+      Alert.alert(
+        'Location Permission',
+        `${APP_NAME} needs access to your location to fetch your current address. Would you like to enable location access?`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => {
+              setLocationLoading(false);
+            },
+          },
+          {
+            text: 'Enable',
+            onPress: async () => {
+              setLocationLoading(true);
+              const granted = await requestLocationPermission();
+              if (granted) {
+                // Permission granted, now fetch location
+                await fetchLocationData();
+              } else {
+                setLocationLoading(false);
+              }
+            },
+          },
+        ]
+      );
+      return;
+    }
+    
+    // Permission already granted, fetch location
+    await fetchLocationData();
+  };
+
+  const fetchLocationData = async () => {
     setLocationLoading(true);
     try {
       const locationData = await fetchCurrentLocation();

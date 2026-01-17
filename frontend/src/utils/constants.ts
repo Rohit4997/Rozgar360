@@ -1,12 +1,13 @@
 // App constants
 
-export const APP_NAME = 'Rozgar360';
+export const APP_NAME = 'Rozgar Setu';
 export const APP_VERSION = '1.0.0';
 
 // Contact information
-export const CONTACT_EMAIL = 'support@rozgar360.com';
-export const CONTACT_PHONE = '+919876543210';
-export const INFO_EMAIL = 'info@rozgar360.com';
+export const CONTACT_EMAIL = 'rohitrkd4997@gmail.com';
+export const CONTACT_PHONE = '+917425004997';
+export const INFO_EMAIL = 'rohitrkd4997@gmail.com';
+export const ADDRESS = 'Jaipur, Rajasthan, India';
 
 // Validation
 export const PHONE_NUMBER_LENGTH = 10;

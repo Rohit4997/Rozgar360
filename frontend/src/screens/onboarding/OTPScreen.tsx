@@ -129,7 +129,7 @@ export const OTPScreen = () => {
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
-            <Text style={styles.hint}>💡 Use OTP: 1234</Text>
+            {/* <Text style={styles.hint}>💡 Use OTP: 1234</Text> */}
 
             <Button
               title={t('auth.verifyOtp')}
