@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Switch,
   TextInput,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
@@ -18,6 +20,7 @@ import { Container } from '../../components/ui/Container';
 import { useUserStore } from '../../stores/userStore';
 import { useAuthStore } from '../../stores/authStore';
 import { RootStackParamList } from '../../navigation/types';
+import { fetchCurrentLocation } from '../../utils/location';
 
 const DEFAULT_SKILLS = [
   'farming',
@@ -65,6 +68,10 @@ export const ProfileSetupScreen = () => {
   const [skillInput, setSkillInput] = React.useState('');
   const [experience, setExperience] = React.useState('');
   const [selectedLabourType, setSelectedLabourType] = React.useState('');
+  const [locationAddress, setLocationAddress] = React.useState('');
+  const [latitude, setLatitude] = React.useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = React.useState<number | undefined>(undefined);
+  const [locationLoading, setLocationLoading] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
   const toggleSkill = (skill: string) => {
@@ -105,6 +112,39 @@ export const ProfileSetupScreen = () => {
     addSkill();
   };
 
+  const handleFetchLocation = async () => {
+    setLocationLoading(true);
+    try {
+      const locationData = await fetchCurrentLocation();
+      setLocationAddress(locationData.address);
+      setLatitude(locationData.latitude);
+      setLongitude(locationData.longitude);
+      
+      // Try to extract city, state, pincode from address if they're empty
+      // This is a simple extraction - you might want to improve this
+      if (!city || !state || !pincode) {
+        const addressParts = locationData.address.split(',');
+        if (addressParts.length >= 3) {
+          if (!city) setCity(addressParts[addressParts.length - 3]?.trim() || '');
+          if (!state) setState(addressParts[addressParts.length - 2]?.trim() || '');
+          // Try to extract pincode (usually last part or second last)
+          const pincodeMatch = locationData.address.match(/\b\d{6}\b/);
+          if (pincodeMatch && !pincode) {
+            setPincode(pincodeMatch[0]);
+          }
+        }
+      }
+    } catch (error: any) {
+      Alert.alert(
+        t('common.error') || 'Error',
+        error.message || t('profileSetup.locationFetchFailed') || 'Failed to fetch location',
+        [{ text: t('common.ok') || 'OK' }]
+      );
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
@@ -138,6 +178,8 @@ export const ProfileSetupScreen = () => {
           skills: selectedSkills,
           experienceYears: parseInt(experience, 10),
           labourType: selectedLabourType as any,
+          latitude,
+          longitude,
         });
 
         if (result.success) {
@@ -189,6 +231,30 @@ export const ProfileSetupScreen = () => {
             error={errors.address}
             multiline
           />
+
+          {/* Current Location Field */}
+          <View style={styles.locationContainer}>
+            <Text style={styles.label}>{t('profileSetup.currentLocation')}</Text>
+            <View style={styles.locationInputContainer}>
+              <TextInput
+                style={styles.locationInput}
+                placeholder={t('profileSetup.locationPlaceholder') || 'Click Fetch to get current location'}
+                placeholderTextColor={theme.colors.placeholder}
+                value={locationAddress}
+                editable={false}
+              />
+              <TouchableOpacity
+                style={[styles.fetchButton, locationLoading && styles.fetchButtonDisabled]}
+                onPress={handleFetchLocation}
+                disabled={locationLoading}>
+                {locationLoading ? (
+                  <ActivityIndicator size="small" color={theme.colors.textLight} />
+                ) : (
+                  <Text style={styles.fetchButtonText}>{t('profileSetup.fetchLocation') || 'Fetch'}</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
 
           <View style={styles.row}>
             <Input
@@ -533,6 +599,42 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     marginTop: theme.spacing.lg,
+  },
+  locationContainer: {
+    marginBottom: theme.spacing.base,
+  },
+  locationInputContainer: {
+    flexDirection: 'row',
+    marginTop: theme.spacing.xs,
+  },
+  locationInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: 8,
+    paddingHorizontal: theme.spacing.base,
+    paddingVertical: theme.spacing.md,
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.textPrimary,
+    backgroundColor: theme.colors.backgroundGray || theme.colors.background,
+  },
+  fetchButton: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    borderRadius: 8,
+    backgroundColor: theme.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: theme.spacing.sm,
+    minWidth: 80,
+  },
+  fetchButtonDisabled: {
+    opacity: 0.6,
+  },
+  fetchButtonText: {
+    color: theme.colors.textLight,
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.medium,
   },
 });
 
