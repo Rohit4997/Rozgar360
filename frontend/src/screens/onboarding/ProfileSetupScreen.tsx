@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
+  TextInput,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
@@ -18,7 +19,7 @@ import { useUserStore } from '../../stores/userStore';
 import { useAuthStore } from '../../stores/authStore';
 import { RootStackParamList } from '../../navigation/types';
 
-const SKILLS = [
+const DEFAULT_SKILLS = [
   'farming',
   'carWashing',
   'carDriving',
@@ -61,6 +62,7 @@ export const ProfileSetupScreen = () => {
   const [bio, setBio] = React.useState('');
   const [isAvailable, setIsAvailable] = React.useState(false);
   const [selectedSkills, setSelectedSkills] = React.useState<string[]>([]);
+  const [skillInput, setSkillInput] = React.useState('');
   const [experience, setExperience] = React.useState('');
   const [selectedLabourType, setSelectedLabourType] = React.useState('');
   const [errors, setErrors] = React.useState<Record<string, string>>({});
@@ -71,6 +73,36 @@ export const ProfileSetupScreen = () => {
     } else {
       setSelectedSkills([...selectedSkills, skill]);
     }
+    if (errors.skills) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.skills;
+        return newErrors;
+      });
+    }
+  };
+
+  const addSkill = () => {
+    const trimmedSkill = skillInput.trim();
+    if (trimmedSkill && !selectedSkills.includes(trimmedSkill)) {
+      setSelectedSkills([...selectedSkills, trimmedSkill]);
+      setSkillInput('');
+      if (errors.skills) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.skills;
+          return newErrors;
+        });
+      }
+    }
+  };
+
+  const removeSkill = (skill: string) => {
+    setSelectedSkills(selectedSkills.filter((s) => s !== skill));
+  };
+
+  const handleSkillInputSubmit = () => {
+    addSkill();
   };
 
   const validate = () => {
@@ -211,25 +243,71 @@ export const ProfileSetupScreen = () => {
           </View>
 
           <Text style={styles.sectionTitle}>{t('profileSetup.skillsTitle')}</Text>
-          <View style={styles.skillsContainer}>
-            {SKILLS.map((skill) => (
+          
+          {/* Default Skills */}
+          <View style={styles.defaultSkillsContainer}>
+            {DEFAULT_SKILLS.map((skill) => (
               <TouchableOpacity
                 key={skill}
                 style={[
-                  styles.skillChip,
-                  selectedSkills.includes(skill) && styles.skillChipSelected,
+                  styles.defaultSkillChip,
+                  selectedSkills.includes(skill) && styles.defaultSkillChipSelected,
                 ]}
                 onPress={() => toggleSkill(skill)}>
                 <Text
                   style={[
-                    styles.skillText,
-                    selectedSkills.includes(skill) && styles.skillTextSelected,
+                    styles.defaultSkillText,
+                    selectedSkills.includes(skill) && styles.defaultSkillTextSelected,
                   ]}>
                   {t(`skills.${skill}`)}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
+
+          {/* Manual Skill Input */}
+          <View style={styles.skillInputContainer}>
+            <TextInput
+              style={styles.skillInput}
+              placeholder={t('profileSetup.enterSkill')}
+              placeholderTextColor={theme.colors.placeholder}
+              value={skillInput}
+              onChangeText={setSkillInput}
+              onSubmitEditing={handleSkillInputSubmit}
+              returnKeyType="done"
+            />
+            <TouchableOpacity
+              style={styles.addSkillButton}
+              onPress={addSkill}
+              disabled={!skillInput.trim()}>
+              <Text style={[
+                styles.addSkillButtonText,
+                !skillInput.trim() && styles.addSkillButtonTextDisabled
+              ]}>
+                {t('common.add')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Selected Skills Display */}
+          {selectedSkills.length > 0 && (
+            <View style={styles.selectedSkillsContainer}>
+              <Text style={styles.selectedSkillsLabel}>{t('profileSetup.selectSkills')}:</Text>
+              <View style={styles.skillsContainer}>
+                {selectedSkills.map((skill, index) => (
+                  <TouchableOpacity
+                    key={`${skill}-${index}`}
+                    style={styles.selectedSkillChip}
+                    onPress={() => removeSkill(skill)}>
+                    <Text style={styles.selectedSkillText}>
+                      {DEFAULT_SKILLS.includes(skill) ? t(`skills.${skill}`) : skill}
+                    </Text>
+                    <Text style={styles.removeSkillIcon}> ×</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
           {errors.skills && <Text style={styles.error}>{errors.skills}</Text>}
 
           <Input
@@ -327,12 +405,12 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
     marginTop: theme.spacing.base,
   },
-  skillsContainer: {
+  defaultSkillsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: theme.spacing.base,
+    marginBottom: theme.spacing.md,
   },
-  skillChip: {
+  defaultSkillChip: {
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     borderRadius: 20,
@@ -341,17 +419,85 @@ const styles = StyleSheet.create({
     marginRight: theme.spacing.sm,
     marginBottom: theme.spacing.sm,
   },
-  skillChipSelected: {
+  defaultSkillChipSelected: {
     backgroundColor: theme.colors.primary,
     borderColor: theme.colors.primary,
   },
-  skillText: {
+  defaultSkillText: {
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.textSecondary,
   },
-  skillTextSelected: {
+  defaultSkillTextSelected: {
     color: theme.colors.textLight,
     fontWeight: theme.typography.fontWeight.medium,
+  },
+  skillInputContainer: {
+    flexDirection: 'row',
+    marginBottom: theme.spacing.md,
+  },
+  skillInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: 8,
+    paddingHorizontal: theme.spacing.base,
+    paddingVertical: theme.spacing.md,
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.textPrimary,
+    backgroundColor: theme.colors.background,
+  },
+  addSkillButton: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    borderRadius: 8,
+    backgroundColor: theme.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 70,
+    marginLeft: theme.spacing.sm,
+  },
+  addSkillButtonText: {
+    color: theme.colors.textLight,
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.medium,
+  },
+  addSkillButtonTextDisabled: {
+    opacity: 0.5,
+  },
+  selectedSkillsContainer: {
+    marginBottom: theme.spacing.base,
+  },
+  selectedSkillsLabel: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.sm,
+  },
+  skillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  selectedSkillChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primary,
+    marginRight: theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
+  },
+  selectedSkillText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.textLight,
+    fontWeight: theme.typography.fontWeight.medium,
+  },
+  removeSkillIcon: {
+    fontSize: theme.typography.fontSize.lg,
+    color: theme.colors.textLight,
+    marginLeft: theme.spacing.xs,
+    fontWeight: theme.typography.fontWeight.bold,
   },
   labourTypesContainer: {
     flexDirection: 'row',

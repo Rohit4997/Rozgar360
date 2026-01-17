@@ -24,6 +24,7 @@ export const en = {
     loading: 'Loading...',
     error: 'Error',
     success: 'Success',
+    add: 'Add',
   },
 
   // Welcome Screen
@@ -82,6 +83,7 @@ export const en = {
     skillsTitle: 'Skills',
     addSkills: 'Add your skills',
     selectSkills: 'Select Skills',
+    enterSkill: 'Enter a custom skill',
     experience: 'Experience (Years)',
     enterExperience: 'Enter your experience',
     labourType: 'Labour Type',

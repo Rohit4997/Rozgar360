@@ -24,6 +24,7 @@ export const hi = {
       loading: 'लोड हो रहा है...',
       error: 'त्रुटि',
       success: 'सफल',
+      add: 'जोड़ें',
     },
   
     // Welcome Screen
@@ -82,6 +83,7 @@ export const hi = {
       skillsTitle: 'कौशल',
       addSkills: 'अपने कौशल जोड़ें',
       selectSkills: 'कौशल चुनें',
+      enterSkill: 'एक कस्टम कौशल दर्ज करें',
       experience: 'अनुभव (वर्ष)',
       enterExperience: 'अपना अनुभव दर्ज करें',
       labourType: 'श्रमिक प्रकार',
