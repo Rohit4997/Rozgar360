@@ -141,6 +141,19 @@ export const EditProfileScreen = () => {
     }
   };
 
+  const isFormValid = () => {
+    return (
+      name.trim() !== '' &&
+      address.trim() !== '' &&
+      city.trim() !== '' &&
+      state.trim() !== '' &&
+      pincode.trim() !== '' &&
+      selectedSkills.length > 0 &&
+      experience.trim() !== '' &&
+      selectedLabourType !== ''
+    );
+  };
+
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
@@ -215,6 +228,7 @@ export const EditProfileScreen = () => {
             value={name}
             onChangeText={setName}
             error={errors.name}
+            required
           />
 
           <Input
@@ -233,6 +247,7 @@ export const EditProfileScreen = () => {
             onChangeText={setAddress}
             error={errors.address}
             multiline
+            required
           />
 
           {/* Current Location Field */}
@@ -287,6 +302,7 @@ export const EditProfileScreen = () => {
             value={state}
             onChangeText={setState}
             error={errors.state}
+            required
           />
 
           <Input
@@ -311,7 +327,10 @@ export const EditProfileScreen = () => {
             />
           </View>
 
-          <Text style={styles.sectionTitle}>{t('profileSetup.skillsTitle')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('profileSetup.skillsTitle')}
+            <Text style={styles.required}> *</Text>
+          </Text>
           
           {/* Default Skills */}
           <View style={styles.defaultSkillsContainer}>
@@ -386,9 +405,13 @@ export const EditProfileScreen = () => {
             onChangeText={setExperience}
             keyboardType="number-pad"
             error={errors.experience}
+            required
           />
 
-          <Text style={styles.sectionTitle}>{t('profileSetup.labourType')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('profileSetup.labourType')}
+            <Text style={styles.required}> *</Text>
+          </Text>
           <View style={styles.labourTypesContainer}>
             {LABOUR_TYPES.map((type) => (
               <TouchableOpacity
@@ -424,6 +447,7 @@ export const EditProfileScreen = () => {
               variant="primary"
               size="large"
               style={styles.button}
+              disabled={!isFormValid()}
             />
           </View>
         </View>
@@ -666,5 +690,9 @@ const styles = StyleSheet.create({
     color: theme.colors.textLight,
     fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.medium,
+  },
+  required: {
+    color: theme.colors.error,
+    fontSize: theme.typography.fontSize.base,
   },
 });

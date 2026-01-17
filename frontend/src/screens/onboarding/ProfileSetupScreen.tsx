@@ -145,6 +145,19 @@ export const ProfileSetupScreen = () => {
     }
   };
 
+  const isFormValid = () => {
+    return (
+      name.trim() !== '' &&
+      address.trim() !== '' &&
+      city.trim() !== '' &&
+      state.trim() !== '' &&
+      pincode.trim() !== '' &&
+      selectedSkills.length > 0 &&
+      experience.trim() !== '' &&
+      selectedLabourType !== ''
+    );
+  };
+
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
@@ -212,6 +225,7 @@ export const ProfileSetupScreen = () => {
             value={name}
             onChangeText={setName}
             error={errors.name}
+            required
           />
 
           <Input
@@ -230,6 +244,7 @@ export const ProfileSetupScreen = () => {
             onChangeText={setAddress}
             error={errors.address}
             multiline
+            required
           />
 
           {/* Current Location Field */}
@@ -264,6 +279,7 @@ export const ProfileSetupScreen = () => {
               onChangeText={setCity}
               error={errors.city}
               containerStyle={styles.halfInput}
+              required
             />
 
             <Input
@@ -275,6 +291,7 @@ export const ProfileSetupScreen = () => {
               maxLength={6}
               error={errors.pincode}
               containerStyle={styles.halfInput}
+              required
             />
           </View>
 
@@ -284,6 +301,7 @@ export const ProfileSetupScreen = () => {
             value={state}
             onChangeText={setState}
             error={errors.state}
+            required
           />
 
           <Input
@@ -308,7 +326,10 @@ export const ProfileSetupScreen = () => {
             />
           </View>
 
-          <Text style={styles.sectionTitle}>{t('profileSetup.skillsTitle')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('profileSetup.skillsTitle')}
+            <Text style={styles.required}> *</Text>
+          </Text>
           
           {/* Default Skills */}
           <View style={styles.defaultSkillsContainer}>
@@ -383,9 +404,13 @@ export const ProfileSetupScreen = () => {
             onChangeText={setExperience}
             keyboardType="number-pad"
             error={errors.experience}
+            required
           />
 
-          <Text style={styles.sectionTitle}>{t('profileSetup.labourType')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('profileSetup.labourType')}
+            <Text style={styles.required}> *</Text>
+          </Text>
           <View style={styles.labourTypesContainer}>
             {LABOUR_TYPES.map((type) => (
               <TouchableOpacity
@@ -414,6 +439,7 @@ export const ProfileSetupScreen = () => {
             size="large"
             style={styles.submitButton}
             loading={loading}
+            disabled={!isFormValid() || loading}
           />
         </View>
       </ScrollView>
@@ -599,6 +625,10 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     marginTop: theme.spacing.lg,
+  },
+  required: {
+    color: theme.colors.error,
+    fontSize: theme.typography.fontSize.base,
   },
   locationContainer: {
     marginBottom: theme.spacing.base,

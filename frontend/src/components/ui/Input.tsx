@@ -13,6 +13,7 @@ interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
   containerStyle?: ViewStyle;
+  required?: boolean;
 }
 
 export const Input = ({
@@ -20,11 +21,17 @@ export const Input = ({
   error,
   containerStyle,
   style,
+  required,
   ...props
 }: InputProps) => {
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && (
+        <Text style={styles.label}>
+          {label}
+          {required && <Text style={styles.required}> *</Text>}
+        </Text>
+      )}
       <TextInput
         style={[styles.input, error && styles.inputError, style]}
         placeholderTextColor={theme.colors.placeholder}
@@ -62,6 +69,10 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.error,
     marginTop: theme.spacing.xs,
+  },
+  required: {
+    color: theme.colors.error,
+    fontSize: theme.typography.fontSize.base,
   },
 });
 
