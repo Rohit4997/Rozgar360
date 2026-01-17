@@ -14,7 +14,7 @@ import { theme } from '../../theme';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { FilterOptions, Skill, LabourType } from '../../types';
-import { useLabourStore } from '../../stores/labourStore';
+import { defaultFilters, useLabourStore } from '../../stores/labourStore';
 
 interface FilterModalProps {
   visible: boolean;
@@ -91,24 +91,9 @@ export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onAp
     onClose();
   };
 
-  const handleReset = () => {
-    const defaultFilters: FilterOptions = {
-      skills: [],
-      experienceRange: { min: 0, max: 50 },
-      labourTypes: [],
-      city: undefined,
-      distance: 50,
-      availableOnly: false,
-      minRating: 0,
-      sortBy: 'rating',
-    };
-    setLocalFilters(defaultFilters);
-    clearFilters();
-  };
-
   const handleClear = () => {
-    handleReset();
-    handleApply();
+    clearFilters();
+    onClose();
   };
 
   return (
@@ -146,10 +131,12 @@ export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onAp
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t('filters.distance')}</Text>
               <Text style={styles.sectionSubtitle}>
-                Show labours within {localFilters.distance} km
+                {localFilters.distance === 999 
+                  ? 'Show all labours (no distance limit)'
+                  : `Show labours within ${localFilters.distance} km`}
               </Text>
               <View style={styles.distanceOptions}>
-                {[10, 25, 50, 75, 100].map((distance) => (
+                {[10, 25, 50, 75, 100, 999].map((distance) => (
                   <TouchableOpacity
                     key={distance}
                     onPress={() =>
@@ -164,7 +151,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onAp
                         styles.distanceOptionText,
                         localFilters.distance === distance && styles.distanceOptionTextSelected,
                       ]}>
-                      {distance} km
+                      {distance === 999 ? '>100 km' : `${distance} km`}
                     </Text>
                   </TouchableOpacity>
                 ))}

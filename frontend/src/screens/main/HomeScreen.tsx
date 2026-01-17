@@ -80,7 +80,8 @@ export const HomeScreen = () => {
   }, []);
 
   const handleApplyFilters = React.useCallback(() => {
-    // Apply filters and fetch labours
+    // Apply filters and fetch labours with current filters
+    // The filters are already set in the store by FilterModal's handleApply
     fetchLabours();
   }, [fetchLabours]);
 

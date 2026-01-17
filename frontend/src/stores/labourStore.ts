@@ -51,12 +51,12 @@ interface LabourState {
   hasActiveFilters: () => boolean;
 }
 
-const defaultFilters: FilterOptions = {
+export const defaultFilters: FilterOptions = {
   skills: [],
   experienceRange: { min: 0, max: 50 },
   labourTypes: [],
   city: undefined,
-  distance: 50,
+  distance: 999,
   availableOnly: false,
   minRating: 0,
   sortBy: 'rating',
@@ -274,10 +274,13 @@ export const useLabourStore = create<LabourState>((set, get) => ({
       set({ loading: true, error: null });
       
       const currentFilters = { ...get().filters, ...filters };
+      const userLocation = get().userLocation;
+      
+      // Build API params (excluding distance - we'll filter that client-side)
       const params: any = {
         availableOnly: currentFilters.availableOnly,
         page: 1,
-        limit: 50,
+        limit: 100, // Get more results to filter by distance client-side
       };
       
       if (currentFilters.city) {
@@ -298,14 +301,51 @@ export const useLabourStore = create<LabourState>((set, get) => ({
       if (currentFilters.minRating > 0) {
         params.minRating = currentFilters.minRating;
       }
-      if (currentFilters.sortBy) {
+      if (currentFilters.sortBy && currentFilters.sortBy !== 'distance') {
         params.sortBy = currentFilters.sortBy;
       }
       
       const response = await getLabours(params);
       
       if (response.success) {
-        const labours = response.labours.map(mapLabourRespToLabour);
+        let labours = response.labours.map(mapLabourRespToLabour);
+        
+        // Calculate distances for all labours if user has location
+        if (userLocation) {
+          labours = labours.map((labour) => {
+            if (labour.latitude && labour.longitude) {
+              const distance = calculateDistance(
+                userLocation.latitude,
+                userLocation.longitude,
+                labour.latitude,
+                labour.longitude
+              );
+              return { ...labour, distance };
+            }
+            return labour;
+          });
+        }
+        
+        // Apply distance filter client-side if set and user has location
+        // 999 means ">100km" or "all distances" - show all labours
+        if (currentFilters.distance !== undefined && currentFilters.distance !== 999 && userLocation) {
+          labours = labours.filter((labour) => {
+            if (labour.distance !== undefined) {
+              return labour.distance <= currentFilters.distance;
+            }
+            return false; // Exclude labours without location when distance filter is active
+          });
+        }
+        
+        // Sort
+        if (currentFilters.sortBy === 'distance' && userLocation) {
+          labours.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+        } else if (currentFilters.sortBy === 'experience') {
+          labours.sort((a, b) => b.experience - a.experience);
+        } else {
+          labours.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        }
+        
         set({ labours, filteredLabours: labours, loading: false });
       } else {
         set({ loading: false, error: 'Failed to fetch labours' });
@@ -368,9 +408,36 @@ export const useLabourStore = create<LabourState>((set, get) => ({
   },
   
   applyFilters: () => {
-    const { filteredLabours, filters, searchQuery } = get();
+    const { labours, filters, searchQuery, userLocation } = get();
     
-    let filtered = [...filteredLabours];
+    let filtered = [...labours];
+    
+    // Calculate distances for all labours if user has location
+    if (userLocation) {
+      filtered = filtered.map((labour) => {
+        if (labour.latitude && labour.longitude) {
+          const distance = calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            labour.latitude,
+            labour.longitude
+          );
+          return { ...labour, distance };
+        }
+        return labour;
+      });
+    }
+    
+    // Apply distance filter if set and user has location
+    // 999 means ">100km" or "all distances" - show all labours
+    if (filters.distance !== undefined && filters.distance !== 999 && userLocation) {
+      filtered = filtered.filter((labour) => {
+        if (labour.distance !== undefined) {
+          return labour.distance <= filters.distance;
+        }
+        return false; // Exclude labours without location when distance filter is active
+      });
+    }
     
     // Search query filter (client-side for already fetched data)
     if (searchQuery.trim()) {
@@ -393,6 +460,7 @@ export const useLabourStore = create<LabourState>((set, get) => ({
   
   clearFilters: () => {
     set({ filters: defaultFilters });
+    get().fetchLabours();
   },
   
   hasActiveFilters: () => {
@@ -403,7 +471,7 @@ export const useLabourStore = create<LabourState>((set, get) => ({
       filters.experienceRange.max < 50 ||
       filters.labourTypes.length > 0 ||
       filters.city !== undefined ||
-      filters.distance < 50 ||
+      (filters.distance !== undefined && filters.distance !== 50 && filters.distance !== 999) ||
       filters.availableOnly ||
       filters.minRating > 0 ||
       filters.sortBy !== 'rating'
