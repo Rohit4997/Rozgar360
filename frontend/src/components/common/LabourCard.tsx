@@ -70,19 +70,19 @@ export const LabourCard = ({ labour, onPress }: LabourCardProps) => {
               <Text style={styles.location}>
                 {labour.city}, {labour.state}
               </Text>
-              {distance && (
+              {distance ? (
                 <Text style={styles.distance}>📍 {distance} {t('home.away') || 'away'}</Text>
-              )}
+              ) : null}
             </View>
             
-            {labour.rating && (
+            {labour.rating ? (
               <View style={styles.ratingRow}>
                 <Text style={styles.rating}>⭐ {labour.rating.toFixed(1)}</Text>
                 <Text style={styles.reviews}>
-                  ({labour.totalReviews} {t('labourDetails.reviews')})
+                  ({labour.totalReviews || 0} {t('labourDetails.reviews')})
                 </Text>
               </View>
-            )}
+            ) : null}
           </View>
         </View>
         
@@ -97,11 +97,11 @@ export const LabourCard = ({ labour, onPress }: LabourCardProps) => {
               </View>
             );
           })}
-          {labour.skills.length > 3 && (
+          {labour.skills.length > 3 ? (
             <View style={styles.skillBadge}>
               <Text style={styles.skillText}>+{labour.skills.length - 3}</Text>
             </View>
-          )}
+          ) : null}
         </View>
         
         <View style={styles.footer}>

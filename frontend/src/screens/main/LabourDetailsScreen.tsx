@@ -186,14 +186,14 @@ export const LabourDetailsScreen = () => {
             </Text>
           </View>
 
-          {labour.rating && (
+          {labour.rating ? (
             <View style={styles.ratingContainer}>
               <Text style={styles.rating}>⭐ {labour.rating.toFixed(1)}</Text>
               <Text style={styles.reviews}>
-                ({labour.totalReviews} {t('labourDetails.reviews')})
+                ({(labour.totalReviews || 0)} {t('labourDetails.reviews')})
               </Text>
             </View>
-          )}
+          ) : null}
         </View>
 
         <View style={styles.section}>
@@ -215,7 +215,7 @@ export const LabourDetailsScreen = () => {
             />
           </View>
           <Text style={styles.infoText}>📞 {labour.phone}</Text>
-          {labour.email && <Text style={styles.infoText}>✉️ {labour.email}</Text>}
+          {labour.email ? <Text style={styles.infoText}>✉️ {labour.email}</Text> : null}
         </View>
 
         <View style={styles.section}>
@@ -224,12 +224,12 @@ export const LabourDetailsScreen = () => {
           <Text style={styles.infoText}>
             {labour.city}, {labour.state} - {labour.pincode}
           </Text>
-          {distance && (
+          {distance ? (
             <Text style={styles.distanceText}>
               📍 {distance} {t('home.away') || 'away'}
             </Text>
-          )}
-          {labour.latitude && labour.longitude && (
+          ) : null}
+          {labour.latitude && labour.longitude ? (
             <Button
               title={t('labourDetails.navigate') || '🗺️ Navigate'}
               onPress={handleNavigate}
@@ -237,7 +237,7 @@ export const LabourDetailsScreen = () => {
               size="medium"
               style={styles.navigateButton}
             />
-          )}
+          ) : null}
         </View>
 
         <View style={styles.section}>
@@ -270,12 +270,12 @@ export const LabourDetailsScreen = () => {
           </Text>
         </View>
 
-        {labour.bio && (
+        {labour.bio ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('labourDetails.about')}</Text>
             <Text style={styles.bioText}>{labour.bio}</Text>
           </View>
-        )}
+        ) : null}
       </ScrollView>
     </Container>
   );
