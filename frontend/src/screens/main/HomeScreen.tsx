@@ -19,6 +19,7 @@ import { LabourCard } from '../../components/common/LabourCard';
 import { useUserStore } from '../../stores/userStore';
 import { useLabourStore } from '../../stores/labourStore';
 import { MainDrawerParamList, HomeStackParamList } from '../../navigation/types';
+import { useUpdateCurrentLocation } from '../../hooks/useUpdateCurrentLocation';
 
 type HomeScreenNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<HomeStackParamList, 'Home'>,
@@ -30,6 +31,9 @@ export const HomeScreen = () => {
   const { t } = useTranslation();
   const { currentUser, toggleAvailability, fetchProfile } = useUserStore();
   const { filteredLabours, searchQuery, setSearchQuery, fetchLabours, searchLabours, loading } = useLabourStore();
+  
+  // Update current location once per session
+  useUpdateCurrentLocation();
 
   // Fetch profile and labours on mount
   React.useEffect(() => {

@@ -113,6 +113,7 @@ export const hi = {
       nearby: 'नजदीकी',
       experience: 'अनुभव',
       rating: 'रेटिंग',
+      away: 'दूर',
     },
   
     // Labour Details

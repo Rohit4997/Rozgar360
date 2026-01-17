@@ -16,6 +16,8 @@ import { Container } from '../../components/ui/Container';
 import { Button } from '../../components/ui/Button';
 import { useLabourStore } from '../../stores/labourStore';
 import { HomeStackParamList } from '../../navigation/types';
+import { useLocationStore } from '../../stores/locationStore';
+import { calculateDistance, formatDistance } from '../../utils/distance';
 
 type LabourDetailsScreenNavigationProp = NativeStackNavigationProp<
   HomeStackParamList,
@@ -29,8 +31,28 @@ export const LabourDetailsScreen = () => {
   const { t } = useTranslation();
   const { labourId } = route.params;
   const getLabourById = useLabourStore((state) => state.getLabourById);
+  const { latitude: currentLat, longitude: currentLon } = useLocationStore();
   const [labour, setLabour] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
+
+  // Calculate distance if both locations are available
+  const distance = React.useMemo(() => {
+    if (
+      currentLat &&
+      currentLon &&
+      labour?.latitude &&
+      labour?.longitude
+    ) {
+      const dist = calculateDistance(
+        currentLat,
+        currentLon,
+        labour.latitude,
+        labour.longitude
+      );
+      return formatDistance(dist);
+    }
+    return null;
+  }, [currentLat, currentLon, labour?.latitude, labour?.longitude]);
 
   React.useEffect(() => {
     const fetchLabour = async () => {
@@ -150,16 +172,26 @@ export const LabourDetailsScreen = () => {
           <Text style={styles.infoText}>
             {labour.city}, {labour.state} - {labour.pincode}
           </Text>
+          {distance && (
+            <Text style={styles.distanceText}>
+              📍 {distance} {t('home.away') || 'away'}
+            </Text>
+          )}
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('labourDetails.skills')}</Text>
           <View style={styles.skillsContainer}>
-                {labour.skills.map((skill: string) => (
-              <View key={skill} style={styles.skillBadge}>
-                <Text style={styles.skillText}>{t(`skills.${skill}`)}</Text>
-              </View>
-            ))}
+            {labour.skills.map((skill: string) => {
+              // Try to translate skill, fallback to skill name if translation not found
+              const translated = t(`skills.${skill}`);
+              const skillLabel = translated === `skills.${skill}` ? skill : translated;
+              return (
+                <View key={skill} style={styles.skillBadge}>
+                  <Text style={styles.skillText}>{skillLabel}</Text>
+                </View>
+              );
+            })}
           </View>
         </View>
 
@@ -312,6 +344,12 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.base,
     color: theme.colors.textSecondary,
     lineHeight: theme.typography.lineHeight.relaxed * theme.typography.fontSize.base,
+  },
+  distanceText: {
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.primary,
+    fontWeight: theme.typography.fontWeight.medium,
+    marginTop: theme.spacing.xs,
   },
   errorContainer: {
     flex: 1,

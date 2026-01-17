@@ -113,6 +113,7 @@ export const en = {
     nearby: 'Nearby',
     experience: 'Experience',
     rating: 'Rating',
+    away: 'away',
   },
 
   // Labour Details

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Labour } from '../../types';
 import { theme } from '../../theme';
 import { Card } from '../ui/Card';
+import { useLocationStore } from '../../stores/locationStore';
+import { calculateDistance, formatDistance } from '../../utils/distance';
 
 interface LabourCardProps {
   labour: Labour;
@@ -12,6 +14,26 @@ interface LabourCardProps {
 
 export const LabourCard = ({ labour, onPress }: LabourCardProps) => {
   const { t } = useTranslation();
+  const { latitude: currentLat, longitude: currentLon } = useLocationStore();
+
+  // Calculate distance if both locations are available
+  const distance = React.useMemo(() => {
+    if (
+      currentLat &&
+      currentLon &&
+      labour.latitude &&
+      labour.longitude
+    ) {
+      const dist = calculateDistance(
+        currentLat,
+        currentLon,
+        labour.latitude,
+        labour.longitude
+      );
+      return formatDistance(dist);
+    }
+    return null;
+  }, [currentLat, currentLon, labour.latitude, labour.longitude]);
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
@@ -44,9 +66,14 @@ export const LabourCard = ({ labour, onPress }: LabourCardProps) => {
               )}
             </View>
             
-            <Text style={styles.location}>
-              {labour.city}, {labour.state}
-            </Text>
+            <View style={styles.locationRow}>
+              <Text style={styles.location}>
+                {labour.city}, {labour.state}
+              </Text>
+              {distance && (
+                <Text style={styles.distance}>📍 {distance} {t('home.away') || 'away'}</Text>
+              )}
+            </View>
             
             {labour.rating && (
               <View style={styles.ratingRow}>
@@ -60,11 +87,16 @@ export const LabourCard = ({ labour, onPress }: LabourCardProps) => {
         </View>
         
         <View style={styles.skillsContainer}>
-          {labour.skills.slice(0, 3).map((skill) => (
-            <View key={skill} style={styles.skillBadge}>
-              <Text style={styles.skillText}>{t(`skills.${skill}`)}</Text>
-            </View>
-          ))}
+          {labour.skills.slice(0, 3).map((skill) => {
+            // Try to translate skill, fallback to skill name if translation not found
+            const translated = t(`skills.${skill}`);
+            const skillLabel = translated === `skills.${skill}` ? skill : translated;
+            return (
+              <View key={skill} style={styles.skillBadge}>
+                <Text style={styles.skillText}>{skillLabel}</Text>
+              </View>
+            );
+          })}
           {labour.skills.length > 3 && (
             <View style={styles.skillBadge}>
               <Text style={styles.skillText}>+{labour.skills.length - 3}</Text>
@@ -139,10 +171,18 @@ const styles = StyleSheet.create({
     color: theme.colors.textLight,
     fontWeight: theme.typography.fontWeight.medium,
   },
+  locationRow: {
+    marginBottom: theme.spacing.xs,
+  },
   location: {
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.xs,
+  },
+  distance: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.primary,
+    fontWeight: theme.typography.fontWeight.medium,
+    marginTop: theme.spacing.xs / 2,
   },
   ratingRow: {
     flexDirection: 'row',
