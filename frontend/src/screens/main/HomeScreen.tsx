@@ -16,8 +16,10 @@ import { CompositeNavigationProp } from '@react-navigation/native';
 import { theme } from '../../theme';
 import { Container } from '../../components/ui/Container';
 import { LabourCard } from '../../components/common/LabourCard';
+import { FilterModal } from '../../components/common/FilterModal';
 import { useUserStore } from '../../stores/userStore';
 import { useLabourStore } from '../../stores/labourStore';
+import { useLocationStore } from '../../stores/locationStore';
 import { MainDrawerParamList, HomeStackParamList } from '../../navigation/types';
 import { useUpdateCurrentLocation } from '../../hooks/useUpdateCurrentLocation';
 
@@ -30,11 +32,20 @@ export const HomeScreen = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { t } = useTranslation();
   const { currentUser, toggleAvailability, fetchProfile } = useUserStore();
-  const { filteredLabours, searchQuery, setSearchQuery, fetchLabours, searchLabours, loading } = useLabourStore();
+  const { filteredLabours, searchQuery, setSearchQuery, fetchLabours, searchLabours, loading, hasActiveFilters, setUserLocation } = useLabourStore();
+  const { latitude, longitude } = useLocationStore();
   const searchInputRef = React.useRef<TextInput>(null);
+  const [filterModalVisible, setFilterModalVisible] = React.useState(false);
   
   // Update current location once per session
   useUpdateCurrentLocation();
+  
+  // Sync location to labour store
+  React.useEffect(() => {
+    if (latitude && longitude) {
+      setUserLocation(latitude, longitude);
+    }
+  }, [latitude, longitude, setUserLocation]);
 
   // Fetch profile and labours on mount
   React.useEffect(() => {
@@ -65,15 +76,23 @@ export const HomeScreen = () => {
   }, [navigation]);
 
   const handleFilterPress = React.useCallback(() => {
-    // Navigate to filter screen (can be implemented as modal or separate screen)
+    setFilterModalVisible(true);
   }, []);
+
+  const handleApplyFilters = React.useCallback(() => {
+    // Apply filters and fetch labours
+    fetchLabours();
+  }, [fetchLabours]);
 
   const renderHeader = React.useCallback(() => (
     <View style={styles.listHeader}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{t('home.allLabours')}</Text>
-        <TouchableOpacity onPress={handleFilterPress}>
-          <Text style={styles.filterButton}>⚙️ {t('home.filters')}</Text>
+        <TouchableOpacity onPress={handleFilterPress} style={styles.filterButtonContainer}>
+          <Text style={[styles.filterButton, hasActiveFilters() && styles.filterButtonActive]}>
+            {hasActiveFilters() ? '🔧' : '⚙️'} {t('home.filters')}
+          </Text>
+          {hasActiveFilters() && <View style={styles.filterBadge} />}
         </TouchableOpacity>
       </View>
     </View>
@@ -157,6 +176,12 @@ export const HomeScreen = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="none"
+        />
+
+        <FilterModal
+          visible={filterModalVisible}
+          onClose={() => setFilterModalVisible(false)}
+          onApply={handleApplyFilters}
         />
       </View>
     </Container>
@@ -248,10 +273,26 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.textPrimary,
   },
+  filterButtonContainer: {
+    position: 'relative',
+  },
   filterButton: {
     fontSize: theme.typography.fontSize.base,
     color: theme.colors.primary,
     fontWeight: theme.typography.fontWeight.medium,
+  },
+  filterButtonActive: {
+    color: theme.colors.primary,
+    fontWeight: theme.typography.fontWeight.bold,
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: theme.colors.error,
   },
   emptyContainer: {
     alignItems: 'center',

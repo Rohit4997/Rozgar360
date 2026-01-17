@@ -56,9 +56,11 @@ export interface FilterOptions {
     max: number;
   };
   labourTypes: string[];
+  city?: string;
   distance: number;
   availableOnly: boolean;
   minRating: number;
+  sortBy?: 'rating' | 'experience' | 'distance';
 }
 
 export interface AppSettings {

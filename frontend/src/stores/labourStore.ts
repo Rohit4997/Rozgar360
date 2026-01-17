@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Labour, FilterOptions } from '../types';
 import { getLabours, getLaboursById, getLaboursNearby } from '../api';
 import { LabourResp } from '../api/types';
+import { calculateDistance } from '../utils/distance';
 
 // Helper to convert API LabourResp to app Labour type
 const mapLabourRespToLabour = (labourResp: LabourResp): Labour => ({
@@ -33,9 +34,11 @@ interface LabourState {
   searchQuery: string;
   loading: boolean;
   error: string | null;
+  userLocation: { latitude: number; longitude: number } | null;
   
   // Actions
   setLabours: (labours: Labour[]) => void;
+  setUserLocation: (latitude: number, longitude: number) => void;
   fetchLabours: (filters?: Partial<FilterOptions>) => Promise<void>;
   searchLabours: (filters: Partial<FilterOptions>) => Promise<void>;
   getLabourById: (id: string) => Promise<Labour | null>;
@@ -44,15 +47,19 @@ interface LabourState {
   setSearchQuery: (query: string) => void;
   applyFilters: () => void;
   resetFilters: () => void;
+  clearFilters: () => void;
+  hasActiveFilters: () => boolean;
 }
 
 const defaultFilters: FilterOptions = {
   skills: [],
   experienceRange: { min: 0, max: 50 },
   labourTypes: [],
+  city: undefined,
   distance: 50,
   availableOnly: false,
   minRating: 0,
+  sortBy: 'rating',
 };
 
 // Hardcoded labour data
@@ -256,8 +263,11 @@ export const useLabourStore = create<LabourState>((set, get) => ({
   searchQuery: '',
   loading: false,
   error: null,
+  userLocation: null,
 
   setLabours: (labours) => set({ labours, filteredLabours: labours }),
+  
+  setUserLocation: (latitude: number, longitude: number) => set({ userLocation: { latitude, longitude } }),
   
   fetchLabours: async (filters?: Partial<FilterOptions>) => {
     try {
@@ -270,6 +280,9 @@ export const useLabourStore = create<LabourState>((set, get) => ({
         limit: 50,
       };
       
+      if (currentFilters.city) {
+        params.city = currentFilters.city;
+      }
       if (currentFilters.skills.length > 0) {
         params.skills = currentFilters.skills;
       }
@@ -284,6 +297,9 @@ export const useLabourStore = create<LabourState>((set, get) => ({
       }
       if (currentFilters.minRating > 0) {
         params.minRating = currentFilters.minRating;
+      }
+      if (currentFilters.sortBy) {
+        params.sortBy = currentFilters.sortBy;
       }
       
       const response = await getLabours(params);
@@ -304,40 +320,8 @@ export const useLabourStore = create<LabourState>((set, get) => ({
       set({ loading: true, error: null });
       get().setFilters(filters);
       
-      const currentFilters = { ...get().filters, ...filters };
-      const params: any = {
-        availableOnly: currentFilters.availableOnly,
-        page: 1,
-        limit: 50,
-      };
-      
-      if (get().searchQuery) {
-        params.search = get().searchQuery;
-      }
-      if (currentFilters.skills.length > 0) {
-        params.skills = currentFilters.skills;
-      }
-      if (currentFilters.experienceRange.min > 0) {
-        params.minExperience = currentFilters.experienceRange.min;
-      }
-      if (currentFilters.experienceRange.max < 50) {
-        params.maxExperience = currentFilters.experienceRange.max;
-      }
-      if (currentFilters.labourTypes.length > 0) {
-        params.labourType = currentFilters.labourTypes[0];
-      }
-      if (currentFilters.minRating > 0) {
-        params.minRating = currentFilters.minRating;
-      }
-      
-      const response = await getLabours(params);
-      
-      if (response.success) {
-        const labours = response.labours.map(mapLabourRespToLabour);
-        set({ filteredLabours: labours, loading: false });
-      } else {
-        set({ loading: false, error: 'Failed to search labours' });
-      }
+      // Use fetchLabours which handles distance filtering
+      await get().fetchLabours(filters);
     } catch (error: any) {
       set({ loading: false, error: error.message || 'Failed to search labours' });
     }
@@ -405,6 +389,25 @@ export const useLabourStore = create<LabourState>((set, get) => ({
   resetFilters: () => {
     set({ filters: defaultFilters, searchQuery: '' });
     get().fetchLabours();
+  },
+  
+  clearFilters: () => {
+    set({ filters: defaultFilters });
+  },
+  
+  hasActiveFilters: () => {
+    const filters = get().filters;
+    return (
+      filters.skills.length > 0 ||
+      filters.experienceRange.min > 0 ||
+      filters.experienceRange.max < 50 ||
+      filters.labourTypes.length > 0 ||
+      filters.city !== undefined ||
+      filters.distance < 50 ||
+      filters.availableOnly ||
+      filters.minRating > 0 ||
+      filters.sortBy !== 'rating'
+    );
   },
 }));
 
