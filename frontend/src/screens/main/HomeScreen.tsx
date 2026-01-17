@@ -31,6 +31,7 @@ export const HomeScreen = () => {
   const { t } = useTranslation();
   const { currentUser, toggleAvailability, fetchProfile } = useUserStore();
   const { filteredLabours, searchQuery, setSearchQuery, fetchLabours, searchLabours, loading } = useLabourStore();
+  const searchInputRef = React.useRef<TextInput>(null);
   
   // Update current location once per session
   useUpdateCurrentLocation();
@@ -55,59 +56,20 @@ export const HomeScreen = () => {
     }
   }, [searchQuery, searchLabours, fetchLabours]);
 
-  const handleToggleAvailability = async (value: boolean) => {
+  const handleToggleAvailability = React.useCallback(async (value: boolean) => {
     await toggleAvailability(value);
-  };
+  }, [toggleAvailability]);
 
-  const handleLabourPress = (labourId: string) => {
+  const handleLabourPress = React.useCallback((labourId: string) => {
     navigation.navigate('LabourDetails', { labourId });
-  };
+  }, [navigation]);
 
-  const handleFilterPress = () => {
+  const handleFilterPress = React.useCallback(() => {
     // Navigate to filter screen (can be implemented as modal or separate screen)
-  };
+  }, []);
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <View style={styles.availabilityCard}>
-        <View style={styles.availabilityContent}>
-          <View>
-            <Text style={styles.availabilityTitle}>
-              {t('home.availability')}
-            </Text>
-            <Text style={styles.availabilityStatus}>
-              {currentUser?.isAvailable
-                ? t('home.available')
-                : t('home.notAvailable')}
-            </Text>
-          </View>
-          <Switch
-            value={currentUser?.isAvailable || false}
-            onValueChange={handleToggleAvailability}
-            trackColor={{
-              false: theme.colors.border,
-              true: theme.colors.success,
-            }}
-            thumbColor={theme.colors.background}
-          />
-        </View>
-      </View>
-
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t('home.searchLabour')}
-          placeholderTextColor={theme.colors.placeholder}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <TouchableOpacity style={styles.searchIcon}>
-          <Text style={styles.searchIconText}>🔍</Text>
-        </TouchableOpacity>
-      </View>
-
+  const renderHeader = React.useCallback(() => (
+    <View style={styles.listHeader}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{t('home.allLabours')}</Text>
         <TouchableOpacity onPress={handleFilterPress}>
@@ -115,7 +77,7 @@ export const HomeScreen = () => {
         </TouchableOpacity>
       </View>
     </View>
-  );
+  ), [t, handleFilterPress]);
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
@@ -137,6 +99,49 @@ export const HomeScreen = () => {
           </TouchableOpacity>
         </View>
 
+        <View style={styles.header}>
+          <View style={styles.availabilityCard}>
+            <View style={styles.availabilityContent}>
+              <View>
+                <Text style={styles.availabilityTitle}>
+                  {t('home.availability')}
+                </Text>
+                <Text style={styles.availabilityStatus}>
+                  {currentUser?.isAvailable
+                    ? t('home.available')
+                    : t('home.notAvailable')}
+                </Text>
+              </View>
+              <Switch
+                value={currentUser?.isAvailable || false}
+                onValueChange={handleToggleAvailability}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.success,
+                }}
+                thumbColor={theme.colors.background}
+              />
+            </View>
+          </View>
+
+          <View style={styles.searchContainer}>
+            <TextInput
+              ref={searchInputRef}
+              style={styles.searchInput}
+              placeholder={t('home.searchLabour')}
+              placeholderTextColor={theme.colors.placeholder}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TouchableOpacity style={styles.searchIcon}>
+              <Text style={styles.searchIconText}>🔍</Text>
+            </TouchableOpacity>
+          </View>
+
+        </View>
+
         <FlatList
           data={filteredLabours.filter((l) => l.id !== currentUser?.id)}
           renderItem={({ item }) => (
@@ -150,6 +155,8 @@ export const HomeScreen = () => {
           ListEmptyComponent={renderEmpty}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="none"
         />
       </View>
     </Container>
@@ -184,6 +191,10 @@ const styles = StyleSheet.create({
   },
   header: {
     marginVertical: theme.spacing.base,
+    paddingHorizontal: theme.spacing.lg,
+  },
+  listHeader: {
+    marginTop: theme.spacing.base,
   },
   availabilityCard: {
     backgroundColor: theme.colors.backgroundGray,
