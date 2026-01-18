@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { StatusBar } from 'react-native';
+import { StatusBar, View, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import './src/locales/i18n';
@@ -13,11 +13,14 @@ import { theme } from './src/theme';
 import { getHealth } from './src/api/health';
 
 function App() {
+  const [isHealthCheckDone, setIsHealthCheckDone] = React.useState(false);
 
   React.useEffect(() => {
-    getHealth()
+    getHealth().finally(() => {
+      setIsHealthCheckDone(true);
+    });
   }, []);
-  
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -25,10 +28,25 @@ function App() {
           barStyle="dark-content"
           backgroundColor={theme.colors.background}
         />
-        <RootNavigator />
+        {!isHealthCheckDone ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        ) : (
+          <RootNavigator />
+        )}
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.background,
+  },
+});
 
 export default App;
