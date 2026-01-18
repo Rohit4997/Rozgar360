@@ -13,12 +13,13 @@ import { theme } from './src/theme';
 import { getHealth } from './src/api/health';
 
 function App() {
-  const [isHealthCheckDone, setIsHealthCheckDone] = React.useState(false);
+  const [isHealthCheckDone, setIsHealthCheckDone] = React.useState(true);
 
   React.useEffect(() => {
-    getHealth().finally(() => {
-      setIsHealthCheckDone(true);
-    });
+    getHealth()
+    // .finally(() => {
+    //   setIsHealthCheckDone(true);
+    // });
   }, []);
 
   return (
