@@ -1,5 +1,6 @@
 import Geolocation from 'react-native-geolocation-service';
 import { Platform, PermissionsAndroid, Alert, NativeModules } from 'react-native';
+import { APP_NAME } from './constants';
 
 const { GeocoderModule } = NativeModules;
 
@@ -22,7 +23,7 @@ export async function requestLocationPermission(): Promise<boolean> {
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       {
         title: 'Location Permission',
-        message: 'Rozgar360 needs access to your location to fetch your current address.',
+        message: `${APP_NAME} needs access to your location to fetch your current address.`,
         buttonNeutral: 'Ask Me Later',
         buttonNegative: 'Cancel',
         buttonPositive: 'OK',

@@ -10,8 +10,14 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import './src/locales/i18n';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { theme } from './src/theme';
+import { getHealth } from './src/api/health';
 
 function App() {
+
+  React.useEffect(() => {
+    getHealth()
+  }, []);
+  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
