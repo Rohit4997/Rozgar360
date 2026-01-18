@@ -42,8 +42,14 @@ export class AuthService {
         };
       }
 
-      // Generate OTP
-      const otp = generateOTP();
+      // Static OTPs for test phone numbers
+      const STATIC_OTPS: Record<string, string> = {
+        '3295004997': '3297',
+        '4997003295': '4932',
+      };
+
+      // Generate OTP (use static OTP for test phone numbers, otherwise generate random)
+      const otp = STATIC_OTPS[phone] || generateOTP();
       const expiresAt = getOTPExpiry();
 
       // Save OTP to database with error handling
